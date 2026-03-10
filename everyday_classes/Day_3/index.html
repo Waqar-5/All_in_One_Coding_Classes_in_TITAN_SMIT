@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreateElement Example</title>
+</head>
+<body>
+    
+    <h2>createElement Example</h2>
+    <div id="container"></div>
+    <button onclick="createPara()">Create Paragraph</button>
+
+
+
+    <!-- <script>
+        function createPara() {
+            // 1. Create a new paragraph element
+            let para = document.createElement("p");
+            // createElement se hum ek naya HTML element banate hain, yahan par "p" tag ka element banaya
+
+            // 2. Set the text content of the paragraph
+            para.textContent = "This is a new paragraph created using JavaScript.";
+            // textContent se hum us paragraph ke andar text set karte hain
+
+            // 3. Append the paragraph to the container div
+            document.getElementById("container").appendChild(para);
+            // appendChild se hum us paragraph ko container div ke andar add karte hain
+        }
+    </script> -->
+
+    <script>
+        function createPara(){
+            // Create a new paragraph element
+            let para = document.createElement("p");
+            let h1 = document.createElement("h1");
+
+
+            // add text to the paragraph
+            para.textContent = "This is a new paragraph created using JavaScript.";
+
+            // add text to the heading
+            h1.textContent = "This is a heading created using JavaScript.";
+
+            // insert the paragraph into the container div
+            // document.getElementById("container").appendChild(para, h1);
+            // ADD multiple elements at once using append
+            // document.getElementById("container").append(para, h1);
+
+
+
+            // output:
+            // This is a new paragraph created using JavaScript.
+
+        }
+    </script>
+    
+
+
+</body>
+</html>
