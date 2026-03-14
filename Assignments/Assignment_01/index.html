@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part 3 – Practical Tasks</title>
+</head>
+<body>
+    
+    <h2>Task 1 – Change Text</h2>
+    <!-- Create a webpage that contains a paragraph and a button.
+When the user clicks the button, the text of the paragraph
+should change. -->
+
+<p id="text">This is original Text</p>
+<button onclick="ChangeContent()">Change Content</button>
+
+<script>
+    function ChangeContent() {
+       let para =  document.getElementById("text")
+       para.textContent = "This is new text"
+    }
+</script>
+
+
+<hr>
+
+
+
+<h2>Task 2 – Add List Item</h2>
+
+<!-- Create a webpage that contains a list and a button.
+When the user clicks the button, a new list item should be
+added to the list. -->
+
+<!-- <div id="list"> -->
+    <ul id="list">
+        <li>Home</li>
+        <li>About</li>
+    </ul>
+<!-- </div> -->
+
+<button onclick="addedNewList()">Added New List</button>
+
+<script>
+    function addedNewList(){
+        let newList = document.getElementById("list")
+        let newItems = document.createElement("li")
+        newItems.textContent = "Contact"
+        newList.append(newItems)
+    }
+</script>
+
+<hr>
+<h2>Task 3 – Remove List Item
+</h2>
+
+<!-- Create a webpage that contains a list and a button.
+When the user clicks the button, the last item of the list should
+be removed. -->
+<ul id="myList">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+</ul>
+
+<button onclick="removeItem()">Remove Last Item</button>
+
+<script>
+function removeItem() {
+    let list = document.getElementById("myList");
+    list.removeChild(list.lastElementChild);
+}
+</script>
+
+
+
+<h2>Task 4 – Replace Element</h2>
+<!-- 
+Create a webpage that contains a heading and a button.
+When the user clicks the button, the old heading should be
+replaced with a new heading. -->
+
+<h3 id="oldHeading">Old Heading</h3>
+
+<button onclick="replaceHeading()">Replace Heading</button>
+
+<script>
+function replaceHeading() {
+    let newHeading = document.createElement("h1");
+    newHeading.innerText = "New Heading";
+
+    let oldHeading = document.getElementById("oldHeading");
+    oldHeading.parentNode.replaceChild(newHeading, oldHeading);
+}
+</script>
+
+
+
+
+</body>
+</html>
