@@ -1,0 +1,26 @@
+.input-container{
+padding:50px;
+text-align:center;
+background:linear-gradient(135deg,#fff7ed,#ffedd5);
+font-family:Arial, Helvetica, sans-serif;
+}
+
+.input-title{
+font-size:30px;
+margin-bottom:20px;
+}
+
+.input-box{
+padding:12px;
+width:250px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:20px;
+font-size:16px;
+}
+
+.display-text{
+font-size:18px;
+color:#334155;
+font-weight:500;
+}

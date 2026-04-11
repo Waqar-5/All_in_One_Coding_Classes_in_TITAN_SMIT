@@ -1,0 +1,84 @@
+/* Main Section */
+
+.counter{
+text-align:center;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+padding:50px;
+background:linear-gradient(135deg,#eef2ff,#e0f2fe);
+font-family:Arial, Helvetica, sans-serif;
+}
+
+/* Heading */
+
+.counter-title{
+font-size:34px;
+font-weight:700;
+margin-bottom:30px;
+color:#1e293b;
+text-align: center;
+}
+
+/* Card */
+
+.counter-card{
+display:inline-block;
+padding:40px;
+border-radius:15px;
+background:white;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Count Number */
+
+.count-number{
+font-size:60px;
+margin-bottom:25px;
+color:#2563eb;
+}
+
+/* Button Group */
+
+.button-group{
+display:flex;
+gap:15px;
+justify-content:center;
+}
+
+/* Buttons */
+
+button{
+padding:12px 25px;
+border:none;
+border-radius:8px;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+transition:all 0.3s ease;
+}
+
+/* Increment Button */
+
+.increment{
+background:#22c55e;
+color:white;
+}
+
+.increment:hover{
+background:#16a34a;
+transform:translateY(-2px);
+}
+
+/* Decrement Button */
+
+.decrement{
+background:#ef4444;
+color:white;
+}
+
+.decrement:hover{
+background:#dc2626;
+transform:translateY(-2px);
+}
