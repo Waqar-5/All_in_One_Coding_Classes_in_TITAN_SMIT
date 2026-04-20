@@ -1,0 +1,15 @@
+.card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  width: 260px;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: all 0.3s ease; /* smooth animation */
+  cursor: pointer;
+}
+
+/* 🔥 Hover Effect */
+.card:hover {
+  transform: translateY(-8px); /* move up */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
