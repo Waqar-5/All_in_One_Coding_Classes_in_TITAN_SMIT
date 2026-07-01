@@ -1,0 +1,482 @@
+
+book
+API Notes
+Yasir Ali
+•
+Yesterday
+Api notes.html
+HTML
+
+Class comments
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#fff}
+  .page{padding:2rem 1.75rem;font-family:var(--font-sans);background:#fff}
+
+  /* HERO */
+  .hero{background:#0f0f23;border-radius:18px;padding:2rem 2rem 1.75rem;margin-bottom:2rem;position:relative;overflow:hidden}
+  .hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:.12em;color:#6366f1;text-transform:uppercase;margin-bottom:.5rem}
+  .hero-title{font-size:28px;font-weight:500;color:#fff;line-height:1.25;margin-bottom:.6rem}
+  .hero-title span{color:#818cf8}
+  .hero-sub{font-size:13.5px;color:#94a3b8;line-height:1.6;max-width:520px}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:1.25rem}
+  .hero-chip{font-size:11px;padding:4px 12px;border-radius:20px;border:0.5px solid #334155;color:#94a3b8;font-weight:500}
+
+  /* TOPIC SECTION */
+  .topic{margin-bottom:2.25rem}
+  .topic-header{display:flex;align-items:center;gap:12px;margin-bottom:1.1rem}
+  .topic-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+  .topic-title{font-size:18px;font-weight:500;color:#0f172a}
+  .topic-sub{font-size:12px;color:#94a3b8;margin-top:2px}
+  .accent-bar{width:3px;height:100%;border-radius:2px;position:absolute;left:0;top:0}
+
+  /* NOTE CARD */
+  .note{border-radius:14px;padding:1.35rem 1.5rem;margin-bottom:.9rem;border:1px solid}
+  .note-label{font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.55rem}
+  .note-title{font-size:14.5px;font-weight:500;margin-bottom:.4rem;line-height:1.35}
+  .note-body{font-size:13px;line-height:1.75;color:#475569}
+  .note-analogy{font-size:12.5px;line-height:1.7;font-style:italic;margin-top:.75rem;padding:.75rem 1rem;border-radius:8px}
+
+  /* PILL ROW */
+  .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:.9rem 0}
+  .pill{font-size:12px;padding:5px 13px;border-radius:20px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+  .pill i{font-size:13px}
+
+  /* COMPARE */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:.9rem 0}
+  .cbox{border-radius:12px;padding:1.1rem 1.25rem;border:1px solid}
+  .cbox-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.4rem}
+  .cbox-title{font-size:14px;font-weight:500;margin-bottom:.4rem}
+  .cbox-body{font-size:12.5px;line-height:1.7}
+  .cbox-points{margin-top:.65rem;display:flex;flex-direction:column;gap:5px}
+  .cpoint{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.55}
+  .cpoint-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+  /* METHOD CARDS */
+  .method{border-radius:12px;padding:1.1rem 1.35rem;margin-bottom:.75rem;border-left:4px solid;border-top:1px solid;border-right:1px solid;border-bottom:1px solid}
+  .method-top{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+  .method-verb{font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;font-family:var(--font-mono);letter-spacing:.02em}
+  .method-name{font-size:13.5px;font-weight:500}
+  .method-desc{font-size:12.5px;line-height:1.7;color:#475569}
+  .method-eg{font-size:12px;margin-top:.5rem;padding:.6rem .85rem;border-radius:7px;line-height:1.6}
+
+  /* STATUS GRID */
+  .status-group{margin-bottom:1.1rem}
+  .sg-title{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;margin-bottom:.6rem;display:flex;align-items:center;gap:8px}
+  .sg-line{flex:1;height:1px;background:#f1f5f9}
+  .status-cards{display:flex;flex-direction:column;gap:6px}
+  .sc{display:flex;align-items:flex-start;gap:12px;padding:.8rem 1rem;border-radius:10px;border:1px solid}
+  .sc-code{font-size:13px;font-weight:500;font-family:var(--font-mono);min-width:36px;flex-shrink:0}
+  .sc-name{font-size:12.5px;font-weight:500;margin-bottom:2px}
+  .sc-desc{font-size:12px;color:#64748b;line-height:1.5}
+
+  /* PROMISE FLOW */
+  .flow-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:.9rem 0}
+  .fnode{border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:500;text-align:center}
+  .farrow{color:#cbd5e1;font-size:16px;font-weight:300}
+
+  /* INSIGHT BOX */
+  .insight{border-radius:12px;padding:1.1rem 1.35rem;margin:.9rem 0;border-left:4px solid;border-top:1px solid;border-right:1px solid;border-bottom:1px solid}
+  .insight-icon{font-size:15px;margin-bottom:.35rem}
+  .insight-title{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem}
+  .insight-body{font-size:13px;line-height:1.75}
+
+  /* DIVIDER */
+  .section-div{border:none;border-top:1px dashed #e2e8f0;margin:2rem 0}
+
+  /* ASK BTN */
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
+  .ask{font-size:11.5px;padding:6px 14px;border-radius:20px;border:1px solid;background:transparent;cursor:pointer;font-family:var(--font-sans);font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s}
+  .ask:hover{opacity:.65}
+  .ask i{font-size:13px}
+</style>
+
+<div class="page">
+<h2 class="sr-only">Professional API fundamentals notes</h2>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Complete Study Notes</div>
+  <div class="hero-title">API Fundamentals<br><span>From Basics to Mastery</span></div>
+  <div class="hero-sub">Everything you need to understand APIs — clear explanations, real-life analogies, and key concepts organized beautifully.</div>
+  <div class="hero-chips">
+    <span class="hero-chip"><i class="ti ti-plug" style="font-size:11px"></i> Why APIs</span>
+    <span class="hero-chip">REST vs GraphQL</span>
+    <span class="hero-chip">JSON vs XML</span>
+    <span class="hero-chip">HTTP Methods</span>
+    <span class="hero-chip">Status Codes</span>
+    <span class="hero-chip">Promises</span>
+    <span class="hero-chip">Error Handling</span>
+  </div>
+</div>
+
+<!-- ① WHY APIS -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#EDE9FE;color:#5B21B6;">01</div>
+    <div><div class="topic-title">Why and where we use APIs</div><div class="topic-sub">The invisible glue of every modern app</div></div>
+  </div>
+
+  <div class="note" style="background:#FAFAFF;border-color:#DDD6FE;">
+    <div class="note-label" style="color:#7C3AED;"><i class="ti ti-bulb" aria-hidden="true"></i> Definition</div>
+    <div class="note-title" style="color:#1e1b4b;">An API is the messenger between two software systems</div>
+    <div class="note-body">API stands for Application Programming Interface. It defines a set of rules for how two pieces of software talk to each other. One side requests, the other responds. You don't need to know what's happening inside — you just use the interface.</div>
+    <div class="note-analogy" style="background:#EDE9FE;color:#4C1D95;">
+      <i class="ti ti-quote" aria-hidden="true" style="color:#7C3AED;font-size:15px"></i> &nbsp;Think of a waiter at a restaurant. You tell the waiter what you want (client). The waiter goes to the kitchen (server) and returns with your food. You never enter the kitchen yourself — the waiter is the API.
+    </div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.5rem 0 .6rem;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">Where APIs are used every day</div>
+  <div class="pill-row">
+    <span class="pill" style="background:#EDE9FE;color:#5B21B6;"><i class="ti ti-map-pin" aria-hidden="true"></i>Google Maps in Careem/Uber</span>
+    <span class="pill" style="background:#EFF6FF;color:#1D4ED8;"><i class="ti ti-credit-card" aria-hidden="true"></i>Stripe payment at checkout</span>
+    <span class="pill" style="background:#F0FDF4;color:#15803D;"><i class="ti ti-cloud" aria-hidden="true"></i>Weather on your phone</span>
+    <span class="pill" style="background:#FEF3C7;color:#D97706;"><i class="ti ti-brand-google" aria-hidden="true"></i>Sign in with Google</span>
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-send" aria-hidden="true"></i>WhatsApp Business messages</span>
+    <span class="pill" style="background:#F0F9FF;color:#0369A1;"><i class="ti ti-photo" aria-hidden="true"></i>Instagram feed loading</span>
+  </div>
+
+  <div class="insight" style="background:#F8FAFF;border-left-color:#6366F1;border-top-color:#E0E7FF;border-right-color:#E0E7FF;border-bottom-color:#E0E7FF;">
+    <div class="insight-title" style="color:#4338CA;">Why we need APIs</div>
+    <div class="insight-body" style="color:#374151;">APIs let us reuse instead of rebuild — no need to build a payment system, maps, or login from scratch. They also act as security gatekeepers, keeping your database hidden from the outside world. Multiple apps (web, mobile, desktop) can all use the same API without duplicating logic.</div>
+  </div>
+  <div class="btn-row">
+    <button class="ask" style="color:#7C3AED;border-color:#C4B5FD;" onclick="sendPrompt('Give me 5 more real world examples of APIs in everyday apps with detailed explanations')"><i class="ti ti-arrow-right" aria-hidden="true"></i> More examples</button>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ② REST vs GraphQL -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#DBEAFE;color:#1D4ED8;">02</div>
+    <div><div class="topic-title">REST API vs GraphQL</div><div class="topic-sub">Two philosophies, one goal</div></div>
+  </div>
+
+  <div class="compare">
+    <div class="cbox" style="background:#F0F7FF;border-color:#BFDBFE;">
+      <div class="cbox-label" style="color:#2563EB;">REST API</div>
+      <div class="cbox-title" style="color:#1E3A8A;">Fixed menu, server decides</div>
+      <div class="cbox-body" style="color:#1E40AF;">Many endpoints — one per resource. The server gives you a predefined shape of data whether you need it all or not.</div>
+      <div class="cbox-points">
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">Simple and widely understood</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">Easy browser caching (GET requests)</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">Familiar to every developer</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#DC2626"></div><span style="color:#374151;">Over-fetching — too much data</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#DC2626"></div><span style="color:#374151;">Under-fetching — multiple round trips</span></div>
+      </div>
+    </div>
+    <div class="cbox" style="background:#FAF5FF;border-color:#DDD6FE;">
+      <div class="cbox-label" style="color:#7C3AED;">GraphQL</div>
+      <div class="cbox-title" style="color:#3B0764;">Build your plate, client decides</div>
+      <div class="cbox-body" style="color:#4C1D95;">One single endpoint. You request exactly the fields you need — nothing more, nothing less.</div>
+      <div class="cbox-points">
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">No over or under fetching</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">One request for all related data</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#16A34A"></div><span style="color:#374151;">Self-documenting schema</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#DC2626"></div><span style="color:#374151;">Harder to cache</span></div>
+        <div class="cpoint"><div class="cpoint-dot" style="background:#DC2626"></div><span style="color:#374151;">Steeper learning curve</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="background:#FFFBEB;border-color:#FDE68A;">
+    <div class="note-label" style="color:#D97706;"><i class="ti ti-alert-triangle" aria-hidden="true"></i> The core problem REST has</div>
+    <div class="note-title" style="color:#92400E;">Over-fetching and Under-fetching</div>
+    <div class="note-body"><strong style="color:#B45309;">Over-fetching:</strong> You call /users/42 and get 20 fields back, but you only needed the name. Wasted bandwidth.<br><br><strong style="color:#B45309;">Under-fetching:</strong> You need a user's name + posts + followers. With REST that's 3 separate requests. With GraphQL it's 1.</div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.6rem 0;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">Where each is used in real life</div>
+  <div class="pill-row">
+    <span class="pill" style="background:#EFF6FF;color:#1E40AF;"><i class="ti ti-antenna" aria-hidden="true"></i>REST — Weather, News, Currency APIs</span>
+    <span class="pill" style="background:#EFF6FF;color:#1E40AF;"><i class="ti ti-server" aria-hidden="true"></i>REST — Microservices</span>
+    <span class="pill" style="background:#FAF5FF;color:#6D28D9;"><i class="ti ti-brand-github" aria-hidden="true"></i>GraphQL — GitHub API v4</span>
+    <span class="pill" style="background:#FAF5FF;color:#6D28D9;"><i class="ti ti-shopping-cart" aria-hidden="true"></i>GraphQL — Shopify Storefront</span>
+    <span class="pill" style="background:#FAF5FF;color:#6D28D9;"><i class="ti ti-device-mobile" aria-hidden="true"></i>GraphQL — Mobile apps (save data)</span>
+  </div>
+  <div class="btn-row">
+    <button class="ask" style="color:#1D4ED8;border-color:#93C5FD;" onclick="sendPrompt('Explain REST API authentication: API Keys, JWT, and OAuth simply without code')"><i class="ti ti-lock" aria-hidden="true"></i> REST auth explained</button>
+    <button class="ask" style="color:#7C3AED;border-color:#C4B5FD;" onclick="sendPrompt('How does a GraphQL schema work? Explain queries and mutations simply without code')"><i class="ti ti-schema" aria-hidden="true"></i> GraphQL schema</button>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ③ JSON vs XML -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#FEF3C7;color:#D97706;">03</div>
+    <div><div class="topic-title">JSON vs XML — why JSON won</div><div class="topic-sub">The universal data language of the web</div></div>
+  </div>
+
+  <div class="note" style="background:#FFFBEB;border-color:#FDE68A;">
+    <div class="note-label" style="color:#D97706;"><i class="ti ti-braces" aria-hidden="true"></i> Why we need a data format</div>
+    <div class="note-title" style="color:#78350F;">Servers can't send JavaScript objects over a wire</div>
+    <div class="note-body">Data in memory (variables, objects, arrays) can't travel across a network. It must be converted to plain text first, sent, then converted back. JSON and XML are both text formats that do this job. This process is called serialization (object → text) and deserialization (text → object).</div>
+  </div>
+
+  <div class="compare">
+    <div class="cbox" style="background:#FFFBEB;border-color:#FDE68A;">
+      <div class="cbox-label" style="color:#D97706;">JSON</div>
+      <div class="cbox-title" style="color:#78350F;">Lightweight and readable</div>
+      <div class="cbox-body" style="color:#92400E;">Looks like a JavaScript object. Key-value pairs. Clean, minimal, easy to scan at a glance. Every modern language reads it natively.</div>
+    </div>
+    <div class="cbox" style="background:#F8FAFC;border-color:#E2E8F0;">
+      <div class="cbox-label" style="color:#64748B;">XML</div>
+      <div class="cbox-title" style="color:#334155;">Verbose and tag-heavy</div>
+      <div class="cbox-body" style="color:#475569;">Uses opening and closing tags like HTML. Every field is wrapped twice. Same data takes 2–3× more text to express. Harder to read for humans.</div>
+    </div>
+  </div>
+
+  <div class="insight" style="background:#FFFBEB;border-left-color:#D97706;border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A;">
+    <div class="insight-title" style="color:#B45309;"><i class="ti ti-quote" aria-hidden="true"></i> The analogy that makes it click</div>
+    <div class="insight-body" style="color:#374151;">XML is like sending a formal letter: <em>"Dear Recipient, the temperature is: 32 degrees, Yours sincerely."</em> JSON is like a text message: <em>"temp: 32"</em>. Same information — far less noise.</div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.6rem 0;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">Where XML is still alive</div>
+  <div class="pill-row">
+    <span class="pill" style="background:#F1F5F9;color:#475569;"><i class="ti ti-rss" aria-hidden="true"></i>RSS feeds (news &amp; podcasts)</span>
+    <span class="pill" style="background:#F1F5F9;color:#475569;"><i class="ti ti-building-bank" aria-hidden="true"></i>SOAP — banking &amp; enterprise APIs</span>
+    <span class="pill" style="background:#F1F5F9;color:#475569;"><i class="ti ti-file-text" aria-hidden="true"></i>Microsoft Office files (.docx, .xlsx)</span>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ④ HTTP METHODS -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#FEE2E2;color:#B91C1C;">04</div>
+    <div><div class="topic-title">All HTTP Methods</div><div class="topic-sub">How you tell the server what action to take</div></div>
+  </div>
+
+  <div class="note-body" style="margin-bottom:1rem;font-size:13px;color:#475569;line-height:1.7;">HTTP methods (also called verbs) are the actions you perform on a resource. Together they map to CRUD — Create, Read, Update, Delete. Every API request uses exactly one method.</div>
+
+  <div class="method" style="background:#F0F7FF;border-left-color:#2563EB;border-top-color:#BFDBFE;border-right-color:#BFDBFE;border-bottom-color:#BFDBFE;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#DBEAFE;color:#1D4ED8;">GET</span>
+      <span class="method-name" style="color:#1E3A8A;">Read — fetch data from the server</span>
+    </div>
+    <div class="method-desc">Retrieves a resource without modifying it. Safe to repeat as many times as you want — it never changes anything on the server. It is read-only.</div>
+    <div class="method-eg" style="background:#DBEAFE;color:#1E40AF;"><i class="ti ti-device-mobile" aria-hidden="true"></i> Opening Instagram — your app sends GET requests to fetch your feed, stories, and DMs.</div>
+  </div>
+
+  <div class="method" style="background:#F0FDF4;border-left-color:#16A34A;border-top-color:#BBF7D0;border-right-color:#BBF7D0;border-bottom-color:#BBF7D0;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#DCFCE7;color:#15803D;">POST</span>
+      <span class="method-name" style="color:#14532D;">Create — send new data to the server</span>
+    </div>
+    <div class="method-desc">Submits data to create a new resource. Data travels in the request body, not the URL. Each request creates something new.</div>
+    <div class="method-eg" style="background:#DCFCE7;color:#166534;"><i class="ti ti-user-plus" aria-hidden="true"></i> Signing up for an account — you fill the form and click submit. A POST request sends your name, email, and password to create your account.</div>
+  </div>
+
+  <div class="method" style="background:#FFFBEB;border-left-color:#D97706;border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#FEF3C7;color:#D97706;">PUT</span>
+      <span class="method-name" style="color:#78350F;">Replace — overwrite the entire resource</span>
+    </div>
+    <div class="method-desc">Replaces the complete resource with a new version. You must send all fields — even ones you didn't change. Missing fields get erased.</div>
+    <div class="method-eg" style="background:#FEF3C7;color:#92400E;"><i class="ti ti-id" aria-hidden="true"></i> Editing your full LinkedIn profile — you resubmit name, bio, location, and job title all at once. The server replaces everything it had before.</div>
+  </div>
+
+  <div class="method" style="background:#FFF7ED;border-left-color:#EA580C;border-top-color:#FED7AA;border-right-color:#FED7AA;border-bottom-color:#FED7AA;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#FFEDD5;color:#EA580C;">PATCH</span>
+      <span class="method-name" style="color:#7C2D12;">Update — change only specific fields</span>
+    </div>
+    <div class="method-desc">Partially updates a resource. You send only what changed — the server merges it in. Fields you don't mention stay untouched.</div>
+    <div class="method-eg" style="background:#FFEDD5;color:#C2410C;"><i class="ti ti-camera" aria-hidden="true"></i> Changing only your WhatsApp profile picture — you don't resend your name or status. Just the new photo. The server patches that one field.</div>
+  </div>
+
+  <div class="method" style="background:#FFF1F2;border-left-color:#E11D48;border-top-color:#FECDD3;border-right-color:#FECDD3;border-bottom-color:#FECDD3;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#FFE4E6;color:#BE123C;">DELETE</span>
+      <span class="method-name" style="color:#881337;">Remove — permanently delete a resource</span>
+    </div>
+    <div class="method-desc">Deletes the specified resource from the server. Once done, it's gone.</div>
+    <div class="method-eg" style="background:#FFE4E6;color:#9F1239;"><i class="ti ti-trash" aria-hidden="true"></i> Deleting a tweet, removing a product from your cart, or deactivating your account.</div>
+  </div>
+
+  <div class="method" style="background:#FAF5FF;border-left-color:#7C3AED;border-top-color:#E9D5FF;border-right-color:#E9D5FF;border-bottom-color:#E9D5FF;">
+    <div class="method-top">
+      <span class="method-verb" style="background:#EDE9FE;color:#6D28D9;">HEAD</span>
+      <span class="method-name" style="color:#3B0764;">Check — headers only, no body</span>
+    </div>
+    <div class="method-desc">Like GET, but returns only headers — no actual content. Used to check if a resource exists or get its size/date without downloading it.</div>
+    <div class="method-eg" style="background:#EDE9FE;color:#4C1D95;"><i class="ti ti-download" aria-hidden="true"></i> A download manager checking file size before starting the download — using HEAD, not GET.</div>
+  </div>
+
+  <div class="insight" style="background:#FFFBEB;border-left-color:#D97706;border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A;margin-top:1rem;">
+    <div class="insight-title" style="color:#B45309;"><i class="ti ti-git-diff" aria-hidden="true"></i> PUT vs PATCH — the definitive difference</div>
+    <div class="insight-body" style="color:#374151;"><strong style="color:#D97706;">PUT</strong> = Rewrite the whole page. If you forget to include something, it's gone.<br><strong style="color:#EA580C;">PATCH</strong> = Cross out one line and write the update. Everything else stays.<br><br><strong>Rule of thumb:</strong> If you're sending a complete object → PUT. If you're updating one field → PATCH.</div>
+  </div>
+  <div class="btn-row">
+    <button class="ask" style="color:#E11D48;border-color:#FECDD3;" onclick="sendPrompt('What is idempotency in APIs? Which HTTP methods are idempotent and why does it matter?')"><i class="ti ti-repeat" aria-hidden="true"></i> What is idempotency?</button>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ⑤ STATUS CODES -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#DCFCE7;color:#15803D;">05</div>
+    <div><div class="topic-title">HTTP Status Codes — full list</div><div class="topic-sub">The server's reply in a number</div></div>
+  </div>
+  <div class="note-body" style="margin-bottom:1rem;font-size:13px;color:#475569;line-height:1.7;">Every API response includes a 3-digit code. The first digit tells you the category instantly. <strong style="color:#15803D;">2xx = success</strong>, <strong style="color:#2563EB;">3xx = redirect</strong>, <strong style="color:#D97706;">4xx = your fault</strong>, <strong style="color:#DC2626;">5xx = server's fault</strong>.</div>
+
+  <div class="status-group">
+    <div class="sg-title" style="color:#15803D;"><i class="ti ti-circle-check" aria-hidden="true"></i> 2xx Success <div class="sg-line"></div></div>
+    <div class="status-cards">
+      <div class="sc" style="background:#F0FDF4;border-color:#BBF7D0;"><div class="sc-code" style="color:#15803D;">200</div><div><div class="sc-name" style="color:#14532D;">OK</div><div class="sc-desc">Request worked perfectly. Standard success for GET, PUT, PATCH responses.</div></div></div>
+      <div class="sc" style="background:#F0FDF4;border-color:#BBF7D0;"><div class="sc-code" style="color:#15803D;">201</div><div><div class="sc-name" style="color:#14532D;">Created</div><div class="sc-desc">A new resource was successfully created — returned after a POST. Example: user registered successfully.</div></div></div>
+      <div class="sc" style="background:#F0FDF4;border-color:#BBF7D0;"><div class="sc-code" style="color:#15803D;">204</div><div><div class="sc-name" style="color:#14532D;">No Content</div><div class="sc-desc">Success but nothing to return. Common after DELETE — the item is gone, nothing to send back.</div></div></div>
+    </div>
+  </div>
+
+  <div class="status-group">
+    <div class="sg-title" style="color:#2563EB;"><i class="ti ti-arrow-forward" aria-hidden="true"></i> 3xx Redirect <div class="sg-line"></div></div>
+    <div class="status-cards">
+      <div class="sc" style="background:#EFF6FF;border-color:#BFDBFE;"><div class="sc-code" style="color:#2563EB;">301</div><div><div class="sc-name" style="color:#1E3A8A;">Moved Permanently</div><div class="sc-desc">Resource has a new permanent URL. Browsers and search engines update their links automatically.</div></div></div>
+      <div class="sc" style="background:#EFF6FF;border-color:#BFDBFE;"><div class="sc-code" style="color:#2563EB;">302</div><div><div class="sc-name" style="color:#1E3A8A;">Found (Temp Redirect)</div><div class="sc-desc">Temporarily at a different URL. Used in login flows — "go here for now."</div></div></div>
+      <div class="sc" style="background:#EFF6FF;border-color:#BFDBFE;"><div class="sc-code" style="color:#2563EB;">304</div><div><div class="sc-name" style="color:#1E3A8A;">Not Modified</div><div class="sc-desc">Resource hasn't changed since last fetch. Your cached version is still valid — saves bandwidth.</div></div></div>
+    </div>
+  </div>
+
+  <div class="status-group">
+    <div class="sg-title" style="color:#D97706;"><i class="ti ti-alert-circle" aria-hidden="true"></i> 4xx Client Error — you did something wrong <div class="sg-line"></div></div>
+    <div class="status-cards">
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">400</div><div><div class="sc-name" style="color:#78350F;">Bad Request</div><div class="sc-desc">Your request is malformed or missing required fields. Like submitting a form without filling required fields.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">401</div><div><div class="sc-name" style="color:#78350F;">Unauthorized</div><div class="sc-desc">You're not logged in or your token is missing/expired. "Who are you?" — trying to open Gmail without signing in.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">403</div><div><div class="sc-name" style="color:#78350F;">Forbidden</div><div class="sc-desc">You're logged in but don't have permission. "I know who you are, but you can't come in." — a user trying to access the admin panel.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">404</div><div><div class="sc-name" style="color:#78350F;">Not Found</div><div class="sc-desc">Resource doesn't exist at that URL. Wrong link, deleted item, or mistyped endpoint. The most famous status code.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">405</div><div><div class="sc-name" style="color:#78350F;">Method Not Allowed</div><div class="sc-desc">You used the wrong HTTP verb. The endpoint accepts GET only but you sent DELETE.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">409</div><div><div class="sc-name" style="color:#78350F;">Conflict</div><div class="sc-desc">Request conflicts with current state. Example: registering with an email that already exists in the system.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">422</div><div><div class="sc-name" style="color:#78350F;">Unprocessable Entity</div><div class="sc-desc">Data format is valid but the values make no sense. Example: age field contains a negative number — it parsed but is invalid.</div></div></div>
+      <div class="sc" style="background:#FFFBEB;border-color:#FDE68A;"><div class="sc-code" style="color:#D97706;">429</div><div><div class="sc-name" style="color:#78350F;">Too Many Requests</div><div class="sc-desc">Rate limit hit — you're sending too many requests too fast. APIs throttle you to protect their servers.</div></div></div>
+    </div>
+  </div>
+
+  <div class="status-group">
+    <div class="sg-title" style="color:#DC2626;"><i class="ti ti-server-off" aria-hidden="true"></i> 5xx Server Error — the server messed up <div class="sg-line"></div></div>
+    <div class="status-cards">
+      <div class="sc" style="background:#FFF1F2;border-color:#FECDD3;"><div class="sc-code" style="color:#DC2626;">500</div><div><div class="sc-name" style="color:#881337;">Internal Server Error</div><div class="sc-desc">Something crashed on the server. Generic catch-all. Not your fault — it's a bug in the server code.</div></div></div>
+      <div class="sc" style="background:#FFF1F2;border-color:#FECDD3;"><div class="sc-code" style="color:#DC2626;">502</div><div><div class="sc-name" style="color:#881337;">Bad Gateway</div><div class="sc-desc">The middleman server got a bad response from the upstream server. Common in proxy and load balancer setups.</div></div></div>
+      <div class="sc" style="background:#FFF1F2;border-color:#FECDD3;"><div class="sc-code" style="color:#DC2626;">503</div><div><div class="sc-name" style="color:#881337;">Service Unavailable</div><div class="sc-desc">Server is down or overloaded. Usually temporary. Real life: an e-commerce site crashes during a big sale event.</div></div></div>
+      <div class="sc" style="background:#FFF1F2;border-color:#FECDD3;"><div class="sc-code" style="color:#DC2626;">504</div><div><div class="sc-name" style="color:#881337;">Gateway Timeout</div><div class="sc-desc">The middleman didn't get a response in time from the upstream server. Network congestion or overloaded backend.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ⑥ PROMISES -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#FFF7ED;color:#EA580C;">06</div>
+    <div><div class="topic-title">Promise vs Promise.all</div><div class="topic-sub">Handling things that take time</div></div>
+  </div>
+
+  <div class="note" style="background:#FFF7ED;border-color:#FED7AA;">
+    <div class="note-label" style="color:#EA580C;"><i class="ti ti-clock" aria-hidden="true"></i> What is a Promise?</div>
+    <div class="note-title" style="color:#7C2D12;">A placeholder for a value that doesn't exist yet</div>
+    <div class="note-body">When you make an API call, the result isn't instant — it travels across a network. A Promise says "I don't have the answer right now, but I promise to give it to you when it's ready." Your code keeps running while it waits.</div>
+    <div class="note-analogy" style="background:#FFEDD5;color:#7C2D12;">
+      <i class="ti ti-moped" aria-hidden="true" style="color:#EA580C;font-size:15px"></i> &nbsp;You order food on Foodpanda. Your order is <strong>pending</strong>. When it arrives — <strong>fulfilled</strong>. If the restaurant cancels — <strong>rejected</strong>. You keep living your life while waiting — you don't stand at the door doing nothing.
+    </div>
+  </div>
+
+  <div class="flow-row">
+    <div class="fnode" style="background:#FEF3C7;color:#D97706;">Pending</div>
+    <div class="farrow">→</div>
+    <div class="fnode" style="background:#DCFCE7;color:#15803D;">Fulfilled</div>
+    <div class="farrow">or</div>
+    <div class="fnode" style="background:#FFE4E6;color:#BE123C;">Rejected</div>
+  </div>
+
+  <div class="note" style="background:#FAF5FF;border-color:#DDD6FE;margin-top:.5rem;">
+    <div class="note-label" style="color:#7C3AED;"><i class="ti ti-stack" aria-hidden="true"></i> Promise.all — parallel execution</div>
+    <div class="note-title" style="color:#3B0764;">Run multiple promises simultaneously</div>
+    <div class="note-body">Promise.all takes an array of Promises and runs them all at the same time (in parallel). It waits for ALL of them to finish, then returns all results together. If even one fails, everything fails.</div>
+    <div class="note-analogy" style="background:#EDE9FE;color:#3B0764;">
+      <i class="ti ti-tools-kitchen-2" aria-hidden="true" style="color:#7C3AED;font-size:15px"></i> &nbsp;Cooking dinner — you put rice on the stove, chicken in the oven, and salad in the fridge <strong>all at the same time</strong>. You don't wait for the rice before starting the chicken. When everything finishes together — you serve. That's Promise.all.
+    </div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.7rem 0 .5rem;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">Other Promise helpers</div>
+  <div class="method" style="background:#F0FDF4;border-left-color:#16A34A;border-top-color:#BBF7D0;border-right-color:#BBF7D0;border-bottom-color:#BBF7D0;">
+    <div class="method-top"><span class="method-verb" style="background:#DCFCE7;color:#15803D;">allSettled</span><span class="method-name" style="color:#14532D;">Get all results — success or fail</span></div>
+    <div class="method-desc">Like Promise.all but doesn't stop if one fails. Returns results for all promises — fulfilled or rejected. Use when you want everything no matter what.</div>
+    <div class="method-eg" style="background:#DCFCE7;color:#166534;"><i class="ti ti-app-window" aria-hidden="true"></i> Loading a dashboard with weather, news, and stocks — even if weather fails, still show news and stocks.</div>
+  </div>
+  <div class="method" style="background:#FFFBEB;border-left-color:#D97706;border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A;">
+    <div class="method-top"><span class="method-verb" style="background:#FEF3C7;color:#D97706;">race</span><span class="method-name" style="color:#78350F;">First to finish wins</span></div>
+    <div class="method-desc">Returns as soon as the FIRST promise resolves or rejects. Perfect for timeouts — race your API call against a 5-second timer.</div>
+    <div class="method-eg" style="background:#FEF3C7;color:#92400E;"><i class="ti ti-stopwatch" aria-hidden="true"></i> If your API doesn't respond within 5 seconds, show a timeout error. Race the API call against a timer.</div>
+  </div>
+  <div class="method" style="background:#FFF1F2;border-left-color:#E11D48;border-top-color:#FECDD3;border-right-color:#FECDD3;border-bottom-color:#FECDD3;">
+    <div class="method-top"><span class="method-verb" style="background:#FFE4E6;color:#BE123C;">any</span><span class="method-name" style="color:#881337;">First success wins</span></div>
+    <div class="method-desc">Returns when the first one SUCCEEDS. Only fails if ALL of them fail. Great for trying multiple servers and using the fastest one.</div>
+    <div class="method-eg" style="background:#FFE4E6;color:#9F1239;"><i class="ti ti-server" aria-hidden="true"></i> Try 3 backup servers — use whichever responds first. If all 3 fail, then show an error.</div>
+  </div>
+  <div class="btn-row">
+    <button class="ask" style="color:#EA580C;border-color:#FED7AA;" onclick="sendPrompt('Explain the difference between Promise.all and Promise.allSettled with a dashboard loading real world example, no code')"><i class="ti ti-help" aria-hidden="true"></i> allSettled vs all?</button>
+  </div>
+</div>
+
+<hr class="section-div">
+
+<!-- ⑦ TRY/CATCH -->
+<div class="topic">
+  <div class="topic-header">
+    <div class="topic-num" style="background:#FEE2E2;color:#DC2626;">07</div>
+    <div><div class="topic-title">Try / Catch — Error Handling</div><div class="topic-sub">Never let your app crash silently</div></div>
+  </div>
+
+  <div class="note" style="background:#FFF1F2;border-color:#FECDD3;">
+    <div class="note-label" style="color:#DC2626;"><i class="ti ti-shield" aria-hidden="true"></i> What is Try/Catch?</div>
+    <div class="note-title" style="color:#7F1D1D;">Your app's safety net for anything that can go wrong</div>
+    <div class="note-body">When you make an API call, a thousand things can fail — no internet, server down, expired token, wrong data format. Without error handling, your app shows a blank screen or crashes. Try/Catch is how you handle these failures gracefully and show the user something useful instead.</div>
+    <div class="note-analogy" style="background:#FFE4E6;color:#7F1D1D;">
+      <i class="ti ti-car" aria-hidden="true" style="color:#DC2626;font-size:15px"></i> &nbsp;<strong>Try block:</strong> You're driving normally. <strong>Catch block:</strong> If the car breaks down, you don't abandon it — you pull over and call for help. <strong>Finally block:</strong> No matter what happens, you always turn off the engine when done.
+    </div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.7rem 0 .5rem;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">Real crash scenarios — with and without error handling</div>
+
+  <div class="method" style="background:#FFF7ED;border-left-color:#EA580C;border-top-color:#FED7AA;border-right-color:#FED7AA;border-bottom-color:#FED7AA;">
+    <div class="method-top"><span class="method-verb" style="background:#FFEDD5;color:#EA580C;font-family:var(--font-sans);letter-spacing:0">Scenario 1</span><span class="method-name" style="color:#7C2D12;">Network failure on a flight</span></div>
+    <div class="method-desc"><strong style="color:#DC2626;">Without catch:</strong> Blank white screen. User panics, thinks the app is broken.<br><strong style="color:#15803D;">With catch:</strong> You show "No internet connection. Please try again." with a retry button. User knows exactly what happened.</div>
+  </div>
+
+  <div class="method" style="background:#FFF7ED;border-left-color:#D97706;border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A;">
+    <div class="method-top"><span class="method-verb" style="background:#FEF3C7;color:#D97706;font-family:var(--font-sans);letter-spacing:0">Scenario 2</span><span class="method-name" style="color:#78350F;">Login token expires</span></div>
+    <div class="method-desc">User leaves the app open for 2 hours. Token expires. They click something and the API returns 401.<br><strong style="color:#DC2626;">Without catch:</strong> Nothing happens, app freezes.<br><strong style="color:#15803D;">With catch:</strong> You detect 401, clear the old token, redirect to login with "Your session expired. Please log in again."</div>
+  </div>
+
+  <div class="method" style="background:#FFF1F2;border-left-color:#DC2626;border-top-color:#FECDD3;border-right-color:#FECDD3;border-bottom-color:#FECDD3;">
+    <div class="method-top"><span class="method-verb" style="background:#FFE4E6;color:#BE123C;font-family:var(--font-sans);letter-spacing:0">Scenario 3</span><span class="method-name" style="color:#881337;">Server crash during payment</span></div>
+    <div class="method-desc">User clicks "Pay Now." Payment server is overloaded — returns 503.<br><strong style="color:#DC2626;">Without catch:</strong> Broken page. User doesn't know if they were charged. Panic, support tickets.<br><strong style="color:#15803D;">With catch:</strong> "Payment server is busy. Your card was NOT charged. Please try in a moment." — calm, informative.</div>
+  </div>
+
+  <div class="insight" style="background:#FFF1F2;border-left-color:#DC2626;border-top-color:#FECDD3;border-right-color:#FECDD3;border-bottom-color:#FECDD3;margin-top:.5rem;">
+    <div class="insight-title" style="color:#9F1239;"><i class="ti ti-star" aria-hidden="true"></i> Golden rule of error handling</div>
+    <div class="insight-body" style="color:#374151;">Always show the user something <strong>meaningful</strong> when something goes wrong. Never show a blank screen. Never silently swallow the error. Tell them what happened and what they can do next. Errors are not failures — unhandled errors are.</div>
+  </div>
+
+  <div class="note-label" style="color:#64748b;margin:.8rem 0 .5rem;font-size:11px;letter-spacing:.07em;text-transform:uppercase;">When to use Try/Catch</div>
+  <div class="pill-row">
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-wifi-off" aria-hidden="true"></i>Every API call</span>
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-braces" aria-hidden="true"></i>JSON parsing</span>
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-forms" aria-hidden="true"></i>User input processing</span>
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-database" aria-hidden="true"></i>Database operations</span>
+    <span class="pill" style="background:#FFF1F2;color:#BE123C;"><i class="ti ti-file-import" aria-hidden="true"></i>File reading/writing</span>
+  </div>
+  <div class="btn-row">
+    <button class="ask" style="color:#DC2626;border-color:#FECDD3;" onclick="sendPrompt('What are the best practices for API error handling in a React app? Explain without code.')"><i class="ti ti-adjustments" aria-hidden="true"></i> Best practices</button>
+    <button class="ask" style="color:#7C3AED;border-color:#DDD6FE;" onclick="sendPrompt('Explain retry logic with exponential backoff for failed API calls without any code — just the concept')"><i class="ti ti-refresh" aria-hidden="true"></i> Retry logic explained</button>
+  </div>
+</div>
+
+</div>
