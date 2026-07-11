@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Append Example</title>
+
+</head>
+<body>
+    
+
+<h2>Append Example</h2>
+<div id="box" style="border: 1px solid black; padding: 10px; width: 300px;">
+
+</div>
+
+<button onclick="addContent()">Add more Content</button>
+
+
+<script>
+
+function addContent(){
+    let para = document.createElement("p");
+    para.textContent = "This is some new content added to the box.";
+
+    let box = document.getElementById("box");   
+
+    // append para and extra text together
+    box.append(para, " - Extra Text");
+}
+
+// output:
+// This is some new content added to the box. - Extra Text
+
+
+</script>
+
+</body>
+</html>

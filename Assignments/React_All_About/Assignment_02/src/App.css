@@ -1,0 +1,25 @@
+/* Styling for the main heading */
+h1{
+  text-align: center; /* Centers the text horizontally */
+
+  background: linear-gradient(90deg, red, blue); 
+  /* Creates a gradient background that goes from red to blue at a 90° angle (left → right) */
+
+  -webkit-background-clip: text; 
+  /* Clips the background so the gradient appears only inside the text */
+
+  -webkit-text-fill-color: transparent; 
+  /* Makes the normal text color transparent so the gradient becomes visible */
+
+  margin-bottom: 20px; 
+  /* Adds space below the heading */
+
+  font-size: 2.5rem; 
+  /* Sets the text size relative to the root font size (responsive sizing) */
+
+  font-family: 'Arial', sans-serif; 
+  /* Sets Arial as the primary font, and any sans-serif font as backup */
+
+  margin-bottom: 50px; 
+  /* Adds larger space below the heading (this overrides the 20px above) */
+}

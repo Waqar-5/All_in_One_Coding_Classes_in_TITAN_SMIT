@@ -1,0 +1,87 @@
+Part 2 – MCQs
+
+
+Q1
+What does DOM stand for?
+A) Document Object Model
+B) Data Object Method
+C) Document Order Model
+D) Data Output Method
+
+Q2
+Which object represents the entire HTML document?
+A) window
+B) document
+C) html
+D) body
+
+Q3
+Which method selects an element using ID?
+A) getElementsByClassName()
+B) querySelector()
+C) getElementById()
+D) createElement()
+
+Q4
+Which method selects elements using class name?
+A) getElementsByClassName()
+B) getElementById()
+C) querySelectorAll()
+D) appendChild()
+
+Q5
+Which method returns only the first matching element?
+A) querySelector()
+B) querySelectorAll()
+C) getElementsByTagName()
+D) getElementsByClassName()
+
+Q6
+Which property allows adding HTML tags inside content?
+A) innerText
+B) textContent
+C) innerHTML
+D) value
+
+Q7
+Which method is used to create a new HTML element?
+A) appendChild()
+B) createElement()
+C) removeChild()
+D) querySelector()
+
+Q8
+Which method is used to add an element as the last child?
+A) prepend()
+B) appendChild()
+C) remove()
+D) replaceChild()
+
+Q9
+Which method removes a specific child element?
+A) remove()
+B) removeChild()
+C) deleteChild()
+D) pop()
+
+Q10
+Which method replaces an existing element with another
+element?
+A) append()
+B) createElement()
+C) replaceChild()
+D) querySelector()
+
+
+Answer Key:
+Q1: A) Document Object Model
+Q2: B) document
+Q3: C) getElementById()
+Q4: A) getElementsByClassName()
+Q5: A) querySelector()
+Q6: C) innerHTML
+Q7: B) createElement()
+Q8: B) appendChild()
+Q9: B) removeChild()
+Q10: C) replaceChild()
+

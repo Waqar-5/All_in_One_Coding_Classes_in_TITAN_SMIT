@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+<style>
+  body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+  h1 { text-align: center; color: #333; }
+  .container { max-width: 400px; margin: auto; background: white; padding: 15px; border-radius: 10px; }
+  input, button { width: 100%; padding: 10px; margin: 5px 0; }
+  button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+  ul { padding: 0; list-style: none; }
+  li { padding: 8px; background: #eee; margin: 5px 0; border-radius: 5px; }
+</style>
+</head>
+<body>
+    
+    <h1>Student Management System</h1>
+
+    <div class="container">
+        <input id="name" placeholder="Student Name">
+        <input id="age" type="number" placeholder="Student Age">
+        <button onclick="addStudent()">Add Student</button>
+
+        <h3>Student List:</h3>
+        <ul id="list"></ul>
+    </div>
+
+    <script>
+        // 1. Students ka data store karne ke liye ek array banaya
+  // Array isliye banaya takay hum multiple students ka data ek saath rakh saken
+  let students = [];
+
+  // 2. Function jo button click pe call hoga
+  // Ye function do kaam karega: student add kare aur list show kare
+    function addStudent() {
+        // 3. Input fields ki value le rahe hain
+        // document.getElementById('id') se hum specific input ko select karte hain
+        let name = document.getElementById('name').value;
+        // Student ka name
+        let age = document.getElementById('age').value;
+        // Student ki age
+
+        // 4. Simple validation check
+        // Agar name ya age blank ho to alert show kare aur function return (stop) kare
+        if(name == "" || age == ""){
+            alert("Name aur Age dono fill karo");
+            return; // Function yahan end ho jaega, neeche ka coe execute nahi hoga
+        }
+         // 5. Array me student add kar rahe hain
+    // Humne simple string banaya "name - Age: age"
+    // Ye string students array ke andar push ki
+    students.push(name + " - Age: " + age);
+
+    // 6. List ko show karne se pehle clear kar dete hain
+    // // Taake purani list duplicate na ho
+    document.getElementById("list").innerHTML = "";
+
+    // 7. Loop se har student ko list me dikhate hain
+    for (let i = 0; i < students.length; i++){
+          // "+=" ka matlab hai append karna
+      // <li> tag me student ka naam aur age show kar rahe hain
+        document.getElementById("list").innerHTML += "<li>" + students[i] + "</li>";
+    }
+
+    // // 8. Input fields clear kar rahe hain taake next student add karna easy ho
+    document.getElementById('name').value = "";
+    document.getElementById('age').value = "";
+
+    }
+
+
+    </script>
+
+</body>
+</html>
