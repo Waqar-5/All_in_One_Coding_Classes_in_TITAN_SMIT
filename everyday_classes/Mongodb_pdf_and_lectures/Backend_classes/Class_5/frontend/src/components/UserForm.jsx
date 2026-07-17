@@ -25,7 +25,7 @@ function UserForm({
         password: selectedUser.password,
       });
     }
-  }, [selectedUser]);
+  }, [selectedUser])
 
   // Handle Input Change
   const handleChange = (e) => {
@@ -47,6 +47,7 @@ function UserForm({
       // return alert("Please fill all fields.");
     //  return toast.success(res.data.message);
     toast.warning("Please fill all fields.");
+    return;
     }
 
     try {
