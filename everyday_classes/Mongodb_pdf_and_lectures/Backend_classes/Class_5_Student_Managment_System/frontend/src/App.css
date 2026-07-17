@@ -1,0 +1,741 @@
+/* ===================================================
+   GOOGLE FONT
+=================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
+
+/* ===================================================
+   RESET
+=================================================== */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",sans-serif;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+
+  min-height:100vh;
+
+  background:
+  linear-gradient(
+  135deg,
+  #4f46e5 0%,
+  #7c3aed 50%,
+  #2563eb 100%
+  );
+
+  padding:40px 20px;
+}
+
+/* ===================================================
+   SCROLLBAR
+=================================================== */
+
+::-webkit-scrollbar{
+  width:10px;
+}
+
+::-webkit-scrollbar-track{
+  background:#ececec;
+}
+
+::-webkit-scrollbar-thumb{
+
+  background:linear-gradient(
+  #667eea,
+  #764ba2
+  );
+
+  border-radius:20px;
+}
+
+/* ===================================================
+   MAIN APP
+=================================================== */
+
+.app{
+
+  max-width:1400px;
+  margin:auto;
+
+}
+
+/* ===================================================
+   GLASS CONTAINER
+=================================================== */
+
+.container{
+
+  background:rgba(255,255,255,.96);
+
+  backdrop-filter:blur(18px);
+
+  border-radius:28px;
+
+  padding:35px;
+
+  box-shadow:
+
+  0 25px 60px rgba(0,0,0,.18),
+
+  inset 0 1px 0 rgba(255,255,255,.6);
+
+  animation:show .8s ease;
+
+}
+
+@keyframes show{
+
+  from{
+
+    opacity:0;
+    transform:translateY(40px);
+
+  }
+
+  to{
+
+    opacity:1;
+    transform:translateY(0);
+
+  }
+
+}
+
+/* ===================================================
+   MAIN TITLE
+=================================================== */
+
+h1{
+
+  color:white;
+
+  text-align:center;
+
+  font-size:44px;
+
+  font-weight:800;
+
+  margin-bottom:35px;
+
+  letter-spacing:.5px;
+
+}
+
+h1::after{
+
+  content:"";
+
+  display:block;
+
+  width:140px;
+
+  height:5px;
+
+  border-radius:50px;
+
+  margin:15px auto;
+
+  background:white;
+
+}
+
+/* ===================================================
+   FORM
+=================================================== */
+
+form{
+
+  background:white;
+
+  border-radius:20px;
+
+  padding:28px;
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(3,1fr);
+
+  gap:20px;
+
+  box-shadow:
+
+  0 15px 40px rgba(0,0,0,.08);
+
+  margin-bottom:35px;
+
+}
+
+/* ===================================================
+   INPUTS
+=================================================== */
+
+input{
+
+  width:100%;
+
+  padding:16px 18px;
+
+  border-radius:12px;
+
+  border:2px solid #e5e7eb;
+
+  font-size:15px;
+
+  transition:.35s;
+
+  background:#fafafa;
+
+}
+
+input:focus{
+
+  outline:none;
+
+  border-color:#6366f1;
+
+  background:white;
+
+  box-shadow:
+
+  0 0 0 5px rgba(99,102,241,.15);
+
+  transform:translateY(-2px);
+
+}
+
+/* ===================================================
+   PASSWORD
+=================================================== */
+
+.password-box{
+
+  position:relative;
+
+  width:100%;
+
+}
+
+.password-box input{
+
+  padding-right:60px;
+
+}
+
+.eye-btn{
+
+  position:absolute;
+
+  top:50%;
+
+  right:15px;
+
+  transform:translateY(-50%);
+
+  background:none !important;
+
+  color:#555;
+
+  border:none;
+
+  cursor:pointer;
+
+  font-size:20px;
+
+  padding:0;
+
+  width:auto;
+
+  height:auto;
+
+  box-shadow:none !important;
+
+}
+
+.eye-btn:hover{
+
+  color:#4f46e5;
+
+}
+
+/* ===================================================
+   BUTTONS
+=================================================== */
+
+button{
+
+  border:none;
+
+  border-radius:12px;
+
+  cursor:pointer;
+
+  transition:.3s;
+
+  font-weight:600;
+
+  color:white;
+
+}
+
+form button{
+
+  padding:16px;
+
+  background:
+
+  linear-gradient(
+  135deg,
+  #667eea,
+  #764ba2
+  );
+
+}
+
+form button:hover{
+
+  transform:translateY(-3px);
+
+  box-shadow:
+
+  0 12px 25px rgba(102,126,234,.35);
+
+}
+
+.cancel-btn{
+
+  background:#6b7280 !important;
+
+}
+
+.cancel-btn:hover{
+
+  background:#4b5563 !important;
+
+}
+
+/* ===================================================
+   TABLE SECTION
+=================================================== */
+
+.table-section{
+
+  margin-top:20px;
+
+}
+
+.table-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  margin-bottom:20px;
+
+}
+
+.table-header h2{
+
+  color:white;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+}
+
+.user-count{
+
+  background:white;
+
+  color:#4f46e5;
+
+  padding:10px 22px;
+
+  border-radius:30px;
+
+  font-weight:700;
+
+  box-shadow:
+
+  0 10px 25px rgba(0,0,0,.12);
+
+}
+
+
+/* ===================================================
+   TABLE
+=================================================== */
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+
+}
+
+thead{
+
+    background:linear-gradient(
+    135deg,
+    #4f46e5,
+    #7c3aed
+    );
+
+    color:white;
+
+}
+
+th{
+
+    padding:18px;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+
+}
+
+td{
+
+    padding:18px;
+    text-align:center;
+    border-bottom:1px solid #ececec;
+    transition:.3s;
+
+}
+
+tbody tr{
+
+    transition:.35s;
+
+}
+
+tbody tr:nth-child(even){
+
+    background:#fafbff;
+
+}
+
+tbody tr:hover{
+
+    background:#eef2ff;
+    transform:scale(1.01);
+
+}
+
+/* ===================================================
+   ACTION BUTTONS
+=================================================== */
+
+.edit-btn,
+.delete-btn{
+
+    width:42px;
+    height:42px;
+
+    display:inline-flex;
+
+    justify-content:center;
+    align-items:center;
+
+    border:none;
+
+    border-radius:12px;
+
+    color:white;
+
+    cursor:pointer;
+
+    margin:0 5px;
+
+    transition:.35s;
+
+}
+
+.edit-btn{
+
+    background:#22c55e;
+
+}
+
+.edit-btn:hover{
+
+    background:#16a34a;
+    transform:translateY(-3px);
+
+}
+
+.delete-btn{
+
+    background:#ef4444;
+
+}
+
+.delete-btn:hover{
+
+    background:#dc2626;
+    transform:translateY(-3px);
+
+}
+
+/* ===================================================
+   LOADER
+=================================================== */
+
+.loader-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:80px 20px;
+
+}
+
+.loader-icon{
+
+    font-size:60px;
+
+    color:#4f46e5;
+
+    animation:spin 1s linear infinite;
+
+}
+
+.loader-container h2{
+
+    margin-top:20px;
+
+    color:#4f46e5;
+
+}
+
+@keyframes spin{
+
+    100%{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+/* ===================================================
+   EMPTY STATE
+=================================================== */
+
+.empty-state{
+
+    padding:60px 20px;
+
+}
+
+.empty-state h3{
+
+    font-size:28px;
+
+    color:#4f46e5;
+
+    margin-bottom:10px;
+
+}
+
+.empty-state p{
+
+    color:#777;
+
+    font-size:15px;
+
+}
+
+/* ===================================================
+   HORIZONTAL LINE
+=================================================== */
+
+hr{
+
+    border:none;
+
+    height:2px;
+
+    background:linear-gradient(
+    to right,
+    transparent,
+    #d1d5db,
+    transparent
+    );
+
+    margin:35px 0;
+
+}
+
+/* ===================================================
+   INPUT PLACEHOLDER
+=================================================== */
+
+input::placeholder{
+
+    color:#9ca3af;
+
+}
+
+/* ===================================================
+   DISABLED BUTTON
+=================================================== */
+
+button:disabled{
+
+    opacity:.7;
+
+    cursor:not-allowed;
+
+}
+
+/* ===================================================
+   SMOOTH ANIMATION
+=================================================== */
+
+button,
+input,
+table,
+.container{
+
+    transition:all .3s ease;
+
+}
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media(max-width:1100px){
+
+    form{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    body{
+
+        padding:15px;
+
+    }
+
+    .container{
+
+        padding:20px;
+
+    }
+
+    h1{
+
+        font-size:32px;
+
+    }
+
+    .table-header{
+
+        flex-direction:column;
+
+        gap:15px;
+
+        align-items:flex-start;
+
+    }
+
+    table{
+
+        display:block;
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+
+    }
+
+    th,
+    td{
+
+        padding:14px;
+
+    }
+
+}
+
+@media(max-width:500px){
+
+    h1{
+
+        font-size:26px;
+
+    }
+
+    form{
+
+        padding:18px;
+
+    }
+
+    input{
+
+        font-size:14px;
+
+        padding:14px;
+
+    }
+
+    .user-count{
+
+        width:100%;
+
+        text-align:center;
+
+    }
+
+}
+
+/* ===================================================
+   OPTIONAL CARD HOVER
+=================================================== */
+
+.container:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ===================================================
+   NICE SELECTION COLOR
+=================================================== */
+
+::selection{
+
+    background:#6366f1;
+    color:white;
+
+}

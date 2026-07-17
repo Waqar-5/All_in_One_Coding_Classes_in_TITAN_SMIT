@@ -1,0 +1,245 @@
+/* ===========================
+   Google Font
+=========================== */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  padding:40px 20px;
+}
+
+/* ===========================
+   Main Container
+=========================== */
+
+.container{
+  max-width:1300px;
+  margin:auto;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(18px);
+  border-radius:25px;
+  padding:35px;
+  box-shadow:
+      0 20px 60px rgba(0,0,0,.18),
+      inset 0 1px 0 rgba(255,255,255,.5);
+  animation:show .8s ease;
+}
+
+@keyframes show{
+  from{
+      opacity:0;
+      transform:translateY(40px) scale(.98);
+  }
+  to{
+      opacity:1;
+      transform:translateY(0) scale(1);
+  }
+}
+
+/* ===========================
+   Heading
+=========================== */
+
+h1{
+  text-align:center;
+  font-size:42px;
+  font-weight:700;
+  color:white;
+  margin-bottom:35px;
+}
+
+h1::after{
+  content:"";
+  display:block;
+  width:130px;
+  height:5px;
+  margin:15px auto;
+  border-radius:50px;
+  background:linear-gradient(90deg,#667eea,#764ba2);
+}
+
+/* ===========================
+   Form Card
+=========================== */
+
+form{
+  background:#fff;
+  padding:25px;
+  border-radius:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  box-shadow:0 15px 35px rgba(0,0,0,.08);
+  margin-bottom:35px;
+}
+
+/* remove br spacing */
+form br{
+  display:none;
+}
+
+input{
+  width:100%;
+  padding:15px 18px;
+  border:2px solid #e5e7eb;
+  border-radius:12px;
+  font-size:15px;
+  transition:.35s;
+}
+
+input:focus{
+  border-color:#667eea;
+  box-shadow:0 0 0 5px rgba(102,126,234,.15);
+  outline:none;
+  transform:translateY(-2px);
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+button{
+  border:none;
+  border-radius:12px;
+  padding:15px;
+  cursor:pointer;
+  font-weight:600;
+  color:white;
+  transition:.35s;
+}
+
+form button{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+form button:hover{
+  transform:translateY(-4px);
+  box-shadow:0 15px 30px rgba(102,126,234,.35);
+}
+
+form button[type="button"]{
+  background:#6c757d;
+}
+
+form button[type="button"]:hover{
+  background:#555;
+}
+
+/* ===========================
+   Table Card
+=========================== */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  overflow:hidden;
+  border-radius:18px;
+  background:white;
+  box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+thead{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+th{
+  padding:18px;
+  font-size:15px;
+}
+
+td{
+  padding:16px;
+  text-align:center;
+  border-bottom:1px solid #f1f1f1;
+}
+
+tbody tr{
+  transition:.35s;
+}
+
+tbody tr:nth-child(even){
+  background:#fafbff;
+}
+
+tbody tr:hover{
+  background:#eef2ff;
+  transform:scale(1.01);
+}
+
+/* ===========================
+   Table Buttons
+=========================== */
+
+td button{
+  padding:9px 15px;
+  border-radius:8px;
+  margin:0 5px;
+}
+
+td button:first-child{
+  background:#22c55e;
+}
+
+td button:first-child:hover{
+  background:#16a34a;
+}
+
+td button:last-child{
+  background:#ef4444;
+}
+
+td button:last-child:hover{
+  background:#dc2626;
+}
+
+/* ===========================
+   Heading 2
+=========================== */
+
+h2{
+  margin:25px 0 15px;
+  color:white;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media(max-width:992px){
+
+  form{
+      grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:768px){
+
+  body{
+      padding:15px;
+  }
+
+  .container{
+      padding:20px;
+  }
+
+  h1{
+      font-size:30px;
+  }
+
+  table{
+      display:block;
+      overflow-x:auto;
+      white-space:nowrap;
+  }
+
+}
