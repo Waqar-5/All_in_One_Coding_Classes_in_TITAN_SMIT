@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.ink.300") transparent;
+}
+
+html,
+body {
+  @apply antialiased;
+}
+
+body {
+  @apply bg-paper-50 text-ink-700 font-body transition-colors duration-300;
+  background-image: theme("backgroundImage.grain");
+  background-size: 22px 22px;
+}
+
+html.dark body {
+  @apply bg-ink-800 text-paper-100;
+  background-image: radial-gradient(circle at 1px 1px, rgba(241, 236, 221, 0.05) 1px, transparent 0);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid theme("colors.brass.500");
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: theme("colors.brass.100");
+  color: theme("colors.ink.700");
+}
+
+.font-display {
+  font-optical-sizing: auto;
+}
+
+/* Catalog-card dog-ear fold, used on BookCard */
+.dog-ear {
+  position: relative;
+}
+.dog-ear::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, transparent 50%, rgba(22, 35, 28, 0.12) 50%);
+  border-bottom-left-radius: 3px;
+  pointer-events: none;
+  transition: width 0.25s ease, height 0.25s ease;
+}
+.dog-ear:hover::after {
+  width: 30px;
+  height: 30px;
+}
+html.dark .dog-ear::after {
+  background: linear-gradient(135deg, transparent 50%, rgba(241, 236, 221, 0.14) 50%);
+}
+
+/* Hairline divider that reads as a stitched card edge */
+.catalog-rule {
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0,
+    currentColor 4px,
+    transparent 4px,
+    transparent 9px
+  );
+  height: 1px;
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
