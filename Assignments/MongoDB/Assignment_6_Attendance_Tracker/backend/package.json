@@ -1,0 +1,29 @@
+{
+  "name": "attendance-tracker-backend",
+  "version": "1.0.0",
+  "description": "Production-ready MERN Attendance Tracker - Backend REST API",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node sample-data/seed.js"
+  },
+  "keywords": [
+    "mern",
+    "attendance",
+    "express",
+    "mongodb"
+  ],
+  "author": "Senior Full Stack Developer",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "mongoose": "^8.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

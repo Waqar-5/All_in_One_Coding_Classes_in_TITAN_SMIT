@@ -1,0 +1,62 @@
+[
+  {
+    "studentName": "John Carter",
+    "date": "2026-07-20T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Emily Watson",
+    "date": "2026-07-20T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Michael Chen",
+    "date": "2026-07-20T00:00:00.000Z",
+    "status": "Absent"
+  },
+  {
+    "studentName": "Sarah Johnson",
+    "date": "2026-07-21T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "David Kim",
+    "date": "2026-07-21T00:00:00.000Z",
+    "status": "Absent"
+  },
+  {
+    "studentName": "Priya Patel",
+    "date": "2026-07-21T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Ahmed Hassan",
+    "date": "2026-07-22T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Olivia Brown",
+    "date": "2026-07-22T00:00:00.000Z",
+    "status": "Absent"
+  },
+  {
+    "studentName": "Lucas Martinez",
+    "date": "2026-07-23T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Sophia Lee",
+    "date": "2026-07-23T00:00:00.000Z",
+    "status": "Present"
+  },
+  {
+    "studentName": "Daniel Wilson",
+    "date": "2026-07-23T00:00:00.000Z",
+    "status": "Absent"
+  },
+  {
+    "studentName": "Grace Thompson",
+    "date": "2026-07-24T00:00:00.000Z",
+    "status": "Present"
+  }
+]

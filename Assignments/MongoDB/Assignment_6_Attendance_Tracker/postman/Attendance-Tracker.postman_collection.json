@@ -1,0 +1,104 @@
+{
+  "info": {
+    "name": "Attendance Tracker API",
+    "description": "REST API collection for the MERN Stack Attendance Tracker application.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "attendanceId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Attendance",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentName\": \"John Carter\",\n  \"date\": \"2026-07-24\",\n  \"status\": \"Present\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/attendance",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance"]
+        }
+      }
+    },
+    {
+      "name": "Get All Attendance (with filters)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/attendance?search=&status=&date=&sortBy=date&order=desc&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance"],
+          "query": [
+            { "key": "search", "value": "" },
+            { "key": "status", "value": "" },
+            { "key": "date", "value": "" },
+            { "key": "sortBy", "value": "date" },
+            { "key": "order", "value": "desc" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Attendance By ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/attendance/{{attendanceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance", "{{attendanceId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Attendance",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"Absent\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/attendance/{{attendanceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance", "{{attendanceId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Attendance",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/attendance/{{attendanceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance", "{{attendanceId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Attendance Stats (count)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/attendance/count",
+          "host": ["{{baseUrl}}"],
+          "path": ["attendance", "count"]
+        }
+      }
+    }
+  ]
+}
