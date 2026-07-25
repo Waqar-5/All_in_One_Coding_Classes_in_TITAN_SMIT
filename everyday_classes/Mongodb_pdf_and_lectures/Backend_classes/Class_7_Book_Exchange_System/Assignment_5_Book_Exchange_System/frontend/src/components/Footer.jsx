@@ -1,4 +1,5 @@
 import { FiBookOpen, FiGithub, FiMail } from "react-icons/fi";
+import { FaWhatsapp, FaLinkedin } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -28,8 +29,44 @@ export default function Footer() {
             <div>
               <p className="mb-3 font-mono text-xs uppercase tracking-widest text-ink-300 dark:text-paper-400/70">Contact</p>
               <ul className="flex flex-col gap-2 text-sm text-ink-500 dark:text-paper-200">
-                <li className="flex items-center gap-2"><FiMail aria-hidden="true" /> hello@chapterverse.app</li>
-                <li className="flex items-center gap-2"><FiGithub aria-hidden="true" /> chapter-verse</li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href="mailto:wa513480@gmail.com"
+                    className="flex items-center gap-2 hover:text-moss-600 dark:hover:text-brass-400"
+                  >
+                    <FiMail aria-hidden="true" /> wa513480@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href="https://wa.me/923472663721"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:text-moss-600 dark:hover:text-brass-400"
+                  >
+                    <FaWhatsapp aria-hidden="true" /> +92 347 2663721
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href="https://github.com/Waqar-5"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:text-moss-600 dark:hover:text-brass-400"
+                  >
+                    <FiGithub aria-hidden="true" /> @Waqar-5
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <a
+                    href="https://www.linkedin.com/in/waqar-ali-997b962b5/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:text-moss-600 dark:hover:text-brass-400"
+                  >
+                    <FaLinkedin aria-hidden="true" /> Waqar Ali | LinkedIn
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

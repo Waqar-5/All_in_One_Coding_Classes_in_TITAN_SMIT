@@ -12,7 +12,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
-const rateLimit = require("express-rate-limit");
 
 // ======================
 // Load Environment Variables
@@ -33,6 +32,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const exchangeRoutes = require("./routes/exchangeRoutes");
+const favoriteRoutes = require("./routes/favoriteRoutes");
 
 // ======================
 // Error Middleware
@@ -50,7 +50,13 @@ const app = express();
 // Connect Database
 // ======================
 
-connectDB();
+connectDB().then(() => {
+    // Mongoose queues model operations until the connection is ready
+    // regardless, but running this after connectDB() resolves keeps the
+    // startup log order sensible (DB connected, then admin bootstrapped).
+    const seedAdmin = require("./config/seedAdmin");
+    seedAdmin();
+});
 
 // ======================
 // Security Middleware
@@ -102,17 +108,13 @@ app.use("/uploads", express.static("uploads"));
 // ======================
 // Rate Limiter
 // ======================
+// See middleware/rateLimiters.js — this is the generous general limiter;
+// a separate, much stricter limiter is applied only to /api/auth's
+// login/register routes (see routes/authRoutes.js).
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: {
-        success: false,
-        message: "Too many requests. Please try again later."
-    }
-});
+const { generalLimiter } = require("./middleware/rateLimiters");
 
-app.use(limiter);
+app.use(generalLimiter);
 
 // ======================
 // Home Route
@@ -138,6 +140,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 
 app.use("/api/exchange", exchangeRoutes);
+
+app.use("/api/favorites", favoriteRoutes);
 
 // ======================
 // 404 Route

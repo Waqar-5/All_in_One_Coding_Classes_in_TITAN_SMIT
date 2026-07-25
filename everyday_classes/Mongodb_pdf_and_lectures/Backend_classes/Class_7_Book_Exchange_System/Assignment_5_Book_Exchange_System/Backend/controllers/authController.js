@@ -218,6 +218,23 @@ const loginUser = async (req, res) => {
         }
 
         // ===========================
+        // Bootstrap Admin Self-Heal
+        // If this is the designated admin email (see .env / config/
+        // seedAdmin.js), make sure it's flagged Admin right before we
+        // issue the token — covers the edge case where .env was added
+        // or edited without restarting the server since.
+        // ===========================
+
+        if (
+            process.env.ADMIN_EMAIL &&
+            user.email === process.env.ADMIN_EMAIL.toLowerCase() &&
+            user.role !== "Admin"
+        ) {
+            user.role = "Admin";
+            await user.save();
+        }
+
+        // ===========================
         // Generate JWT
         // ===========================
 
@@ -434,7 +451,12 @@ const changePassword = async (req, res) => {
 
         if (!isMatch) {
 
-            return res.status(401).json({
+            // 403, not 401: the user IS authenticated (their JWT is fine) —
+            // they just got the current password wrong. Using 401 here
+            // would trigger the frontend's "session expired, clear the
+            // token" logic on a simple wrong-password guess, logging them
+            // out of a perfectly valid session.
+            return res.status(403).json({
                 success: false,
                 message: "Current password is incorrect."
             });
@@ -470,13 +492,174 @@ const changePassword = async (req, res) => {
 // Export Controller
 // ======================================================
 
+// ======================================================
+// Get All Users (Admin)
+// GET /api/auth/users
+// Admin Route
+// ======================================================
+
+const getAllUsers = async (req, res) => {
+
+    try {
+
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const { search } = req.query;
+
+        const query = {};
+
+        if (search) {
+            const regex = { $regex: search, $options: "i" };
+            query.$or = [{ name: regex }, { email: regex }];
+        }
+
+        const users = await User.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalUsers = await User.countDocuments(query);
+
+        res.status(200).json({
+
+            success: true,
+            totalUsers,
+            currentPage: page,
+            totalPages: Math.ceil(totalUsers / limit),
+            users
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Update A User's Role (Admin)
+// PATCH /api/auth/users/:id/role
+// Admin Route
+// ======================================================
+
+const updateUserRole = async (req, res) => {
+
+    try {
+
+        const { role } = req.body;
+
+        if (!["User", "Admin"].includes(role)) {
+            return res.status(400).json({ success: false, message: "Role must be 'User' or 'Admin'." });
+        }
+
+        if (req.params.id === req.user._id.toString() && role === "User") {
+            return res.status(400).json({ success: false, message: "You can't demote your own account." });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { role },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        res.status(200).json({
+
+            success: true,
+            message: `${user.name} is now ${role === "Admin" ? "an Admin" : "a User"}.`,
+            user
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Toggle A User's Deleted Status (Admin)
+// PATCH /api/auth/users/:id/toggle-delete
+// Admin Route — soft delete / restore, mirrors book soft-delete
+// ======================================================
+
+const toggleUserDeleted = async (req, res) => {
+
+    try {
+
+        if (req.params.id === req.user._id.toString()) {
+            return res.status(400).json({ success: false, message: "You can't delete your own account." });
+        }
+
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        user.isDeleted = !user.isDeleted;
+        await user.save();
+
+        res.status(200).json({
+
+            success: true,
+            message: user.isDeleted ? "User deactivated." : "User restored.",
+            user
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Export Controller
+// ======================================================
+
 module.exports = {
 
     registerUser,
     loginUser,
     getMe,
     updateProfile,
-    changePassword
+    changePassword,
+    getAllUsers,
+    updateUserRole,
+    toggleUserDeleted
 
 };
 

@@ -12,6 +12,7 @@ import {
   FiBook,
   FiEye,
   FiRepeat,
+  FiHeart,
 } from "react-icons/fi";
 import { getBookById, deleteBook } from "../api/books";
 import { requestExchange } from "../api/exchange";
@@ -27,12 +28,14 @@ import PageTransition from "../components/PageTransition";
 import { formatDate } from "../utils/formatDate";
 import { useAuth } from "../context/AuthContext";
 import { useAuthModal } from "../context/AuthModalContext";
+import { useFavorites } from "../context/FavoritesContext";
 
 export default function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { openLogin } = useAuthModal();
+  const { isFavorite, toggle } = useFavorites();
 
   const [book, setBook] = useState(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -136,7 +139,22 @@ export default function BookDetails() {
                   <span className="font-mono text-xs uppercase tracking-widest text-ink-300 dark:text-paper-400/70">
                     Catalog No. {String(book._id).slice(-6).toUpperCase()}
                   </span>
-                  <StatusBadge status={book.status} />
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggle(book._id)}
+                      aria-label={isFavorite(book._id) ? "Remove from wishlist" : "Add to wishlist"}
+                      aria-pressed={isFavorite(book._id)}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-ink-200 dark:border-paper-400/20 text-ink-500 dark:text-paper-200 transition-colors hover:border-brass-400"
+                    >
+                      <FiHeart
+                        className="text-base"
+                        fill={isFavorite(book._id) ? "currentColor" : "none"}
+                        color={isFavorite(book._id) ? "#B8863B" : "currentColor"}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <StatusBadge status={book.status} />
+                  </div>
                 </div>
                 <h1 className="mt-5 font-display text-4xl font-medium leading-tight text-ink-700 dark:text-paper-50">
                   {book.title}

@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FiUser, FiTag, FiMapPin, FiBook } from "react-icons/fi";
+import { FiUser, FiTag, FiMapPin, FiBook, FiHeart } from "react-icons/fi";
 import StatusBadge from "./StatusBadge";
 import { formatDueStamp } from "../utils/formatDate";
 import { getImageUrl } from "../utils/image";
+import { useFavorites } from "../context/FavoritesContext";
 
 // Signature element: each book renders as a library catalog card —
 // cover image up top, shelf-mark number and stamped status overlaid on it,
 // dog-eared corner, and a "date added" stamp at the foot of the card.
 export default function BookCard({ book, index = 0 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const { isFavorite, toggle } = useFavorites();
+  const favorited = isFavorite(book._id);
   const shelfMark = String(book._id || "").slice(-4).toUpperCase() || String(index + 1).padStart(4, "0");
   const ownerName = typeof book.owner === "object" ? book.owner?.name : null;
   const imageUrl = getImageUrl(book.coverImage);
@@ -48,6 +51,24 @@ export default function BookCard({ book, index = 0 }) {
           <div className="absolute right-3 top-3">
             <StatusBadge status={book.status} className="bg-paper-50/90 dark:bg-ink-800/90 backdrop-blur-sm" />
           </div>
+
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggle(book._id);
+            }}
+            aria-label={favorited ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={favorited}
+            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink-900/60 text-paper-50 backdrop-blur-sm transition-colors hover:bg-ink-900/80"
+          >
+            <FiHeart
+              className="text-base"
+              fill={favorited ? "currentColor" : "none"}
+              color={favorited ? "#B8863B" : "currentColor"}
+              aria-hidden="true"
+            />
+          </button>
         </div>
 
         <div className="flex flex-1 flex-col p-6">

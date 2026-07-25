@@ -8,10 +8,13 @@ import BookDetails from "../pages/BookDetails";
 import EditBook from "../pages/EditBook";
 import MyBooks from "../pages/MyBooks";
 import Profile from "../pages/Profile";
+import Wishlist from "../pages/Wishlist";
+import Admin from "../pages/Admin";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
+import AdminRoute from "../components/AdminRoute";
 
 export default function AppRoutes() {
   const location = useLocation();
@@ -56,6 +59,22 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
           }
         />
 

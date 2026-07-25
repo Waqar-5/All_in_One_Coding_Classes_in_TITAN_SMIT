@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { loginUser, registerUser } from "../api/auth";
+import { loginUser, registerUser, getMyProfile } from "../api/auth";
 import { getToken, setToken, clearToken } from "../api/axios";
 
 const AuthContext = createContext(null);
@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [ready, setReady] = useState(true);
+  const [ready, setReady] = useState(false);
 
   // Keep localStorage in sync whenever the user changes.
   useEffect(() => {
@@ -26,14 +26,32 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  // If a request ever 401s, axios clears the token — make sure the UI
-  // reflects "logged out" too by polling for token/user mismatch on mount.
+  // On mount, don't just trust the cached user from localStorage — it can
+  // go stale (e.g. a role change made directly in the database, or from
+  // the admin panel by someone else) and there'd be no way to pick that
+  // up short of manually logging out and back in. Re-fetch from the
+  // server once on load instead, so the source of truth is always the DB.
   useEffect(() => {
-    if (!getToken() && user) {
-      setUser(null);
-    }
-    setReady(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const refreshFromServer = async () => {
+      if (!getToken()) {
+        setUser(null);
+        setReady(true);
+        return;
+      }
+
+      try {
+        const data = await getMyProfile();
+        setUser(data.user);
+      } catch {
+        // Token invalid/expired — axios interceptor already cleared it.
+        setUser(null);
+      } finally {
+        setReady(true);
+      }
+    };
+
+    refreshFromServer();
+  }, []);
 
   const login = async (credentials) => {
     const data = await loginUser(credentials);

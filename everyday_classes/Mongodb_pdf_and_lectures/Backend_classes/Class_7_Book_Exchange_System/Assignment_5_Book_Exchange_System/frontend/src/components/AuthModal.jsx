@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiX, FiLogIn, FiUserPlus, FiBookOpen } from "react-icons/fi";
@@ -14,6 +15,7 @@ const emptyRegister = { name: "", email: "", password: "" };
 export default function AuthModal() {
   const { open, mode, onSuccess, close, openLogin, openRegister } = useAuthModal();
   const { login, register } = useAuth();
+  const navigate = useNavigate();
 
   const [loginForm, setLoginForm] = useState(emptyLogin);
   const [registerForm, setRegisterForm] = useState(emptyRegister);
@@ -60,7 +62,14 @@ export default function AuthModal() {
       const user = isLogin ? await login(loginForm) : await register(registerForm);
       toast.success(isLogin ? `Welcome back, ${user.name.split(" ")[0]}.` : `Welcome to Chapter & Verse, ${user.name.split(" ")[0]}!`);
       close();
-      onSuccess?.(user);
+
+      if (isLogin && user.role === "Admin" && !onSuccess) {
+        // A direct login (not an interrupted "log in to do X" flow) —
+        // send admins straight to the control room.
+        navigate("/admin");
+      } else {
+        onSuccess?.(user);
+      }
     } catch (err) {
       toast.error(err.message || "Something went wrong.");
     } finally {

@@ -6,8 +6,14 @@ import api from "./axios";
 // list endpoints return { success, totalBooks, currentPage, totalPages, books },
 // single-book endpoints return { success, book }.
 
-export const getBooks = async ({ page = 1, limit = 12 } = {}) => {
-  const { data } = await api.get("/books", { params: { page, limit } });
+export const getBooks = async (params = {}) => {
+  // Drop empty/undefined values so we don't send "?category=&condition=" etc.
+  const cleanParams = Object.fromEntries(
+    Object.entries({ page: 1, limit: 12, ...params }).filter(
+      ([, value]) => value !== undefined && value !== null && value !== ""
+    )
+  );
+  const { data } = await api.get("/books", { params: cleanParams });
   return data;
 };
 

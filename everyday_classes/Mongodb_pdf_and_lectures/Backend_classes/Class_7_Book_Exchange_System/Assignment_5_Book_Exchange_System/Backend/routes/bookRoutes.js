@@ -16,6 +16,7 @@ const {
     getBookById,
     getMyBooks,
     getStats,
+    getAllBooksAdmin,
     updateBook,
     deleteBook,
     restoreBook,
@@ -66,6 +67,11 @@ router.get("/my-books", protect, getMyBooks);
 // GET /api/books/stats
 
 router.get("/stats", getStats);
+
+// Get All Books, Including Soft-Deleted (Admin)
+// GET /api/books/admin/all
+
+router.get("/admin/all", protect, adminOnly, getAllBooksAdmin);
 
 // Add Book (multipart/form-data — cover image required)
 // POST /api/books

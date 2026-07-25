@@ -20,12 +20,19 @@ const {
 
     updateProfile,
 
-    changePassword
+    changePassword,
+
+    getAllUsers,
+
+    updateUserRole,
+
+    toggleUserDeleted
 
 } = require("../controllers/authController");
 
-const { protect } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const { authLimiter } = require("../middleware/rateLimiters");
 
 // ======================================================
 // Public Routes
@@ -34,12 +41,12 @@ const upload = require("../middleware/uploadMiddleware");
 // Register User
 // POST /api/auth/register
 
-router.post("/register", registerUser);
+router.post("/register", authLimiter, registerUser);
 
 // Login User
 // POST /api/auth/login
 
-router.post("/login", loginUser);
+router.post("/login", authLimiter, loginUser);
 
 // ======================================================
 // Private Routes
@@ -59,6 +66,25 @@ router.put("/profile", protect, upload.single("profileImage"), updateProfile);
 // PUT /api/auth/change-password
 
 router.put("/change-password", protect, changePassword);
+
+// ======================================================
+// Admin Routes
+// ======================================================
+
+// Get All Users
+// GET /api/auth/users
+
+router.get("/users", protect, adminOnly, getAllUsers);
+
+// Update A User's Role
+// PATCH /api/auth/users/:id/role
+
+router.patch("/users/:id/role", protect, adminOnly, updateUserRole);
+
+// Deactivate / Restore A User
+// PATCH /api/auth/users/:id/toggle-delete
+
+router.patch("/users/:id/toggle-delete", protect, adminOnly, toggleUserDeleted);
 
 // ======================================================
 // Export Router

@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { AuthModalProvider } from "./context/AuthModalContext.jsx";
+import { FavoritesProvider } from "./context/FavoritesContext.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -12,9 +13,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider>
       <AuthProvider>
         <AuthModalProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <FavoritesProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </FavoritesProvider>
         </AuthModalProvider>
       </AuthProvider>
     </ThemeProvider>

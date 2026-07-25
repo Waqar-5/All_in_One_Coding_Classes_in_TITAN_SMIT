@@ -33,7 +33,7 @@ export default function Login() {
     try {
       const user = await login(form);
       toast.success(`Welcome back, ${user.name.split(" ")[0]}.`);
-      navigate(location.state?.from || "/");
+      navigate(user.role === "Admin" ? "/admin" : location.state?.from || "/");
     } catch (err) {
       toast.error(err.message || "Couldn't log you in.");
     } finally {

@@ -289,3 +289,224 @@ don't have — happy to wire it up once you tell me which provider you want
 (wishlist, admin panel UI, search/sort/filter overhaul, chat) is still
 queued — just say which one's next.
 
+---
+
+## Round 6 — a real auth bug, plus Wishlist/Favorites
+
+### Bug fix: changing your password was logging you out
+
+`authController.js`'s `changePassword` returned **401** when the current
+password was wrong. The frontend's axios interceptor treats *any* 401 as
+"the session is invalid" and clears the stored JWT — that logic exists for
+genuinely expired/missing tokens, but it doesn't distinguish between "your
+token is bad" and "you got a business-logic check wrong." So one wrong
+guess at your current password silently logged you out, and every request
+afterward (including retrying the password change) failed with "Access
+denied. No token provided."
+
+**Fix**: that response now returns **403** instead. Correct REST semantics:
+401 = not authenticated at all, 403 = authenticated but this specific
+action isn't allowed. The frontend already surfaces the message either way
+via toast — only the token-clearing side effect was wrong, and that's
+fixed by not sending 401 for a non-token problem in the first place.
+
+If you'd already run into this, you'll need to log in again once — your
+last token was cleared by the old bug.
+
+### New: Wishlist / Favorites
+
+**Backend**
+- **`controllers/favoriteController.js`** (new) — `toggleFavorite`
+  (add/remove a book from `req.user.favorites`, which already existed on
+  the `User` schema), `getMyFavorites` (populated book list for the
+  Wishlist page), `getMyFavoriteIds` (lightweight id list so hearts across
+  the app know what to render as filled without fetching full book data).
+- **`routes/favoriteRoutes.js`** (new), mounted at `/api/favorites` in
+  `server.js`:
+  - `GET /api/favorites/ids`
+  - `GET /api/favorites`
+  - `POST /api/favorites/:bookId` (toggle)
+
+**Frontend**
+- **`context/FavoritesContext.jsx`** (new) — loads the current user's
+  favorite ids once, exposes `isFavorite(id)` / `toggle(id)` with an
+  optimistic update (instant UI feedback, rolled back if the request
+  fails). Guests tapping the heart get the same login popup used for
+  exchange requests, and their action retries automatically after they
+  log in.
+- **`pages/Wishlist.jsx`** (new) — protected page, same card grid/empty
+  state pattern as My Books/Dashboard.
+- **`components/BookCard.jsx`** — heart button overlaid on the cover image
+  (bottom-right), filled brass when favorited.
+- **`pages/BookDetails.jsx`** — heart button next to the status badge.
+- Wired into `main.jsx` (`FavoritesProvider`, nested inside `AuthModalProvider`
+  so it can trigger the login popup), `routes/AppRoutes.jsx` (`/wishlist`),
+  and `components/Navbar.jsx` (new "Wishlist" link for logged-in users).
+
+Still queued from the original audit: Admin panel UI, server-side
+search/sort/filter overhaul, chat/messaging.
+
+---
+
+## Round 7 — Search/Sort/Filter overhaul (server-side)
+
+Previously, Browse only filtered client-side over whatever page happened
+to be loaded — a category filter could "hide" books that were actually on
+page 2. This round moves everything to the backend, matching what both of
+your feature prompts asked for (search by title/author/category/city/isbn/
+tags/owner; filters for category/condition/language/status/city; sort by
+newest/oldest/A-Z/Z-A/recently-updated; clear filters).
+
+### Backend
+- **`bookController.js`** — `getAllBooks` now builds its Mongoose query
+  from `req.query`: `search` (regex `$or` across title/author/category/
+  isbn/tags/location, plus a separate lookup to match owner name — owner
+  is a reference, not a plain field, so it can't join the same `$or`
+  directly), `category`, `condition`, `language`, `status`, `city`, and
+  `sort` (mapped to `newest`/`oldest`/`az`/`za`/`updated`). The existing
+  "Available only" default is preserved when no `status` is passed;
+  `status=All` removes the filter entirely if you ever want a "show
+  everything" view. Pagination (`page`/`limit`) works exactly as before,
+  now applied on top of the filtered query.
+
+### Frontend
+- **`api/books.js`** — `getBooks()` now accepts any of the above as named
+  params and strips out empty ones before sending, so you don't end up
+  with `?category=&condition=` clutter in the request.
+- **`hooks/useBooks.js`** — takes a `filters` object alongside `limit`;
+  any filter change resets back to page 1 automatically.
+- **`components/FilterSelect.jsx`** (new) — small reusable dropdown used
+  for Condition/Language/Status/Sort.
+- **`pages/Books.jsx`** — rewritten: debounced search (350ms) sent to the
+  server instead of filtered client-side, the existing category pill row,
+  a new filter bar (condition, language, status, city text input, sort),
+  and a "Clear filters" button that resets everything back to defaults.
+
+Home and Dashboard's `getBooks({ page: 1, limit: 4 })` calls are
+unaffected — the new params are all optional.
+
+Still queued: Admin panel UI, chat/messaging.
+
+---
+
+## Round 8 — rate limiter was too strict for real usage
+
+You hit `429 Too many requests` across almost every endpoint. The original
+setup applied one limiter — 100 requests per 15 minutes — globally, to
+every single API call. That's far too tight for how this app actually
+behaves: a single page can fire several requests in parallel (auth check,
+favorites, stats, books, my-books, exchange sent/received...), and React's
+StrictMode in development intentionally double-invokes effects, doubling
+every mount-triggered fetch. Normal browsing burns through 100 requests in
+a couple of minutes.
+
+**Fix**: split rate limiting into two tiers in the new
+**`middleware/rateLimiters.js`**:
+- **`generalLimiter`** — 1000 requests/15min, applied globally in
+  `server.js`. Generous enough that no real usage pattern hits it, while
+  still providing basic abuse protection.
+- **`authLimiter`** — 30 requests/15min, applied *only* to
+  `POST /api/auth/register` and `POST /api/auth/login` in `authRoutes.js`.
+  This is where rate limiting actually matters (slowing down
+  password-guessing attempts) — everything else doesn't need to be nearly
+  this strict.
+
+**You'll need to restart the backend** for this to take effect. Restarting
+also immediately clears the current block — `express-rate-limit`'s counter
+lives in memory and resets when the process restarts, so you don't need to
+wait out the 15-minute window.
+
+---
+
+## Round 9 — Admin panel UI
+
+The backend already had `adminOnly` middleware and two admin book routes
+(restore/permanent-delete) sitting unused with no frontend. Built out a
+full admin panel on top of that.
+
+### Backend
+- **`bookController.js`** — added `getAllBooksAdmin`
+  (`GET /api/books/admin/all`), which lists *every* book including
+  soft-deleted ones (the regular `/books` endpoint always excludes
+  `isDeleted: true`), with search and pagination. Registered before `/:id`
+  in `bookRoutes.js`, same ordering rule as `/my-books` and `/stats`.
+- **`authController.js`** — added three admin-only functions:
+  - `getAllUsers` (`GET /api/auth/users`) — paginated, searchable by name/email
+  - `updateUserRole` (`PATCH /api/auth/users/:id/role`) — promote/demote
+    between `User`/`Admin`; blocks an admin from demoting their own account
+  - `toggleUserDeleted` (`PATCH /api/auth/users/:id/toggle-delete`) —
+    deactivate/restore a user (soft delete, mirrors how books already
+    work); blocks deleting your own account
+  - Both self-protection checks return `400`, not `401`/`403`, since it's
+    a normal validation rule, not an auth failure (same reasoning as the
+    change-password fix in Round 6)
+
+### Frontend
+- **`api/admin.js`** (new) — service layer for all of the above
+- **`components/AdminRoute.jsx`** (new) — wraps `ProtectedRoute` (so you
+  get the login prompt if logged out) and additionally checks
+  `user.role === "Admin"`, showing a clean "Admins only" message otherwise
+  rather than a blank page or crash
+- **`pages/Admin.jsx`** (new) — tabbed panel:
+  - **Manage Books** — every book (including deleted ones, clearly
+    labeled), search, restore or permanently delete
+  - **Manage Users** — every user, role badge, search, promote/demote,
+    deactivate/restore — your own row's action buttons are disabled
+    client-side too, not just blocked server-side
+- **`routes/AppRoutes.jsx`** — added `/admin` behind `AdminRoute`
+- **`components/Navbar.jsx`** — "Admin" link appears only when
+  `user.role === "Admin"` (both desktop and mobile menus)
+
+### One thing you'll need to do manually
+There's no signup flow for admin accounts (correctly — that shouldn't be
+self-serve). To make your own account an admin, set it directly in
+MongoDB: find your user document in the `users` collection and change
+`role` from `"User"` to `"Admin"`, then log out and back in so your token/
+profile reflects the change. After that, you can promote other accounts
+from the panel itself.
+
+Still queued: real-time chat, forgot/reset password (needs an email
+provider — let me know which one you want to use).
+
+---
+
+## Round 10 — bootstrap admin account, and a real caching bug
+
+### Bug fix: DB role changes weren't reflected in the app
+
+This was a real bug, not user error. `AuthContext` initialized `user`
+purely from a cached copy in `localStorage` and never re-fetched it from
+the server — so if a role (or anything else) changed in the database
+directly, the app kept using the stale cached copy until you did a full
+logout/login. That's why manually setting `role: "Admin"` in MongoDB
+didn't do anything: your browser was still holding onto the old cached
+user object.
+
+**Fix**: `AuthContext` now calls `GET /api/auth/me` once when the app
+loads (if a token exists) and refreshes `user` from the server — the
+database is the source of truth, not whatever got cached at last login.
+
+### New: a permanent, self-healing admin account
+
+Rather than relying on manual MongoDB edits (fragile, and per the bug
+above, wasn't even taking effect), added `ADMIN_EMAIL`/`ADMIN_PASSWORD` to
+`.env` (set to your requested `waqar52524@gmail.com` / `seebooks@`) and:
+
+- **`config/seedAdmin.js`** (new) — runs once when the server starts.
+  Creates that account if it doesn't exist yet, or if it already exists,
+  forces its role back to `"Admin"` (and un-deletes it if it was ever
+  deactivated). This means that account can never get "stuck" as a
+  regular user, no matter what happens to it.
+- **`authController.js`** — `loginUser` also double-checks this at login
+  time as a second safety net, in case `.env` was added/edited without
+  restarting the server since.
+- **Frontend** — after a successful login, if `user.role === "Admin"`,
+  you're taken straight to `/admin` (both the standalone Login page and
+  the popup modal, though the modal only does this for a *direct* login —
+  if you triggered the modal by trying to do something else first, like
+  favoriting a book, it resumes that action instead of yanking you away).
+
+**You'll need to restart the backend** for `seedAdmin` to run and create/
+fix the account. After that, log in with `waqar52524@gmail.com` /
+`seebooks@` — you should land straight on `/admin`.
+

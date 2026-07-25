@@ -17,6 +17,7 @@ const AUTH_LINKS = [
   { to: "/books", label: "Browse" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/my-books", label: "My Books" },
+  { to: "/wishlist", label: "Wishlist" },
 ];
 
 export default function Navbar() {
@@ -26,7 +27,9 @@ export default function Navbar() {
   const { openLogin, openRegister } = useAuthModal();
   const navigate = useNavigate();
 
-  const links = isAuthenticated ? AUTH_LINKS : GUEST_LINKS;
+  const links = isAuthenticated
+    ? [...AUTH_LINKS, ...(user?.role === "Admin" ? [{ to: "/admin", label: "Admin" }] : [])]
+    : GUEST_LINKS;
 
   const linkClasses = ({ isActive }) =>
     `relative px-1 py-2 text-sm font-semibold tracking-wide transition-colors duration-200

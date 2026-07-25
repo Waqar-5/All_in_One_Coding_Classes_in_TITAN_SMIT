@@ -4,6 +4,7 @@
 
 const mongoose = require("mongoose");
 const Book = require("../models/book");
+const User = require("../models/User");
 const { deleteUploadedFile: deleteImageFile } = require("../utils/fileHelpers");
 
 // FormData can't send real arrays — "tags" arrives either as a
@@ -171,6 +172,14 @@ const addBook = async (req, res) => {
 // Public Route
 // ======================================================
 
+const SORT_OPTIONS = {
+    newest: { createdAt: -1 },
+    oldest: { createdAt: 1 },
+    az: { title: 1 },
+    za: { title: -1 },
+    updated: { updatedAt: -1 }
+};
+
 const getAllBooks = async (req, res) => {
 
     try {
@@ -185,17 +194,58 @@ const getAllBooks = async (req, res) => {
 
         const skip = (page - 1) * limit;
 
+        const { search, category, condition, language, status, city } = req.query;
+
+        const sortBy = SORT_OPTIONS[req.query.sort] || SORT_OPTIONS.newest;
+
+        // ===========================
+        // Build Filter Query
+        // ===========================
+
+        const query = { isDeleted: false };
+
+        // Public catalog defaults to "Available" (a marketplace of what
+        // can actually be requested). An explicit ?status= lets the
+        // Browse page look at a specific other state, and ?status=All
+        // removes the filter entirely (shows every status).
+        if (status && status !== "All") {
+            query.status = status;
+        } else if (!status) {
+            query.status = "Available";
+        }
+        // status === "All" → no status filter applied at all.
+
+        if (category) query.category = category;
+        if (condition) query.condition = condition;
+        if (language) query.language = language;
+        if (city) query.location = { $regex: city, $options: "i" };
+
+        if (search) {
+
+            const regex = { $regex: search, $options: "i" };
+
+            // Owner is a reference, not a plain field — resolve matching
+            // user ids separately so we can search by owner name too.
+            const matchingOwners = await User.find({ name: regex }).select("_id");
+            const ownerIds = matchingOwners.map((u) => u._id);
+
+            query.$or = [
+                { title: regex },
+                { author: regex },
+                { category: regex },
+                { isbn: regex },
+                { tags: regex },
+                { location: regex },
+                ...(ownerIds.length ? [{ owner: { $in: ownerIds } }] : [])
+            ];
+
+        }
+
         // ===========================
         // Find Books
         // ===========================
 
-        const books = await Book.find({
-
-            isDeleted: false,
-
-            status: "Available"
-
-        })
+        const books = await Book.find(query)
 
         .populate(
 
@@ -205,11 +255,7 @@ const getAllBooks = async (req, res) => {
 
         )
 
-        .sort({
-
-            createdAt: -1
-
-        })
+        .sort(sortBy)
 
         .skip(skip)
 
@@ -219,13 +265,7 @@ const getAllBooks = async (req, res) => {
         // Total Books
         // ===========================
 
-        const totalBooks = await Book.countDocuments({
-
-            isDeleted: false,
-
-            status: "Available"
-
-        });
+        const totalBooks = await Book.countDocuments(query);
 
         // ===========================
         // Success Response
@@ -709,7 +749,68 @@ const deleteBook = async (req, res) => {
 };
 
 
-// Restore deleted book
+// ======================================================
+// Get All Books (Admin — includes soft-deleted)
+// GET /api/books/admin/all
+// Admin Route
+// ======================================================
+
+const getAllBooksAdmin = async (req, res) => {
+
+    try {
+
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const { search } = req.query;
+
+        const query = {};
+
+        if (search) {
+            const regex = { $regex: search, $options: "i" };
+            query.$or = [{ title: regex }, { author: regex }, { isbn: regex }];
+        }
+
+        const books = await Book.find(query)
+            .populate("owner", "name email")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalBooks = await Book.countDocuments(query);
+
+        res.status(200).json({
+
+            success: true,
+            totalBooks,
+            currentPage: page,
+            totalPages: Math.ceil(totalBooks / limit),
+            books
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Restore Soft-Deleted Book
+// PATCH /api/books/restore/:id
+// Admin Route
+// ======================================================
+
 const restoreBook = async (req, res) => {
     try {
         const { id } = req.params;
@@ -782,6 +883,8 @@ module.exports = {
     getMyBooks,
 
     getStats,
+
+    getAllBooksAdmin,
 
     updateBook,
 
