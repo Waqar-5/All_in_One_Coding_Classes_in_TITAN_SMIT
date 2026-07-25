@@ -35,7 +35,7 @@ const showToast = (icon, title) => {
 
 const Dashboard = () => {
   const [records, setRecords] = useState([]);
-  const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, percentage: 0 });
+  const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, percentage: 0, limitInfo: null });
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -207,6 +207,36 @@ const Dashboard = () => {
 
       <DashboardCards stats={stats} />
 
+      {stats.limitInfo && stats.limitInfo.limit > 0 && (
+        <div
+          className={`glass-panel mb-4 py-3 ${stats.limitInfo.remaining === 0 ? '' : ''}`}
+          style={{ borderLeft: `4px solid ${stats.limitInfo.remaining === 0 ? 'var(--danger)' : 'var(--grad-1)'}` }}
+        >
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <strong>Attendance limit:</strong> {stats.limitInfo.used} / {stats.limitInfo.limit} records used
+              {stats.limitInfo.remaining === 0 && (
+                <div className="small text-danger fw-semibold mt-1">
+                  You've reached your limit — ask an admin to increase it before adding more.
+                </div>
+              )}
+            </div>
+            <div className="stat-progress-track" style={{ width: 160, background: 'rgba(99,102,241,0.15)' }}>
+              <div
+                className="stat-progress-fill"
+                style={{
+                  width: `${Math.min((stats.limitInfo.used / stats.limitInfo.limit) * 100, 100)}%`,
+                  background:
+                    stats.limitInfo.remaining === 0
+                      ? 'var(--danger)'
+                      : 'linear-gradient(135deg, var(--grad-1), var(--grad-2))',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="row g-4">
         <div className="col-12 col-lg-8">
           <AttendanceForm
@@ -214,6 +244,9 @@ const Dashboard = () => {
             onSubmit={handleFormSubmit}
             onCancelEdit={handleCancelEdit}
             submitting={submitting}
+            limitReached={Boolean(
+              stats.limitInfo && stats.limitInfo.limit > 0 && stats.limitInfo.remaining === 0
+            )}
           />
 
           <FilterBar

@@ -623,6 +623,64 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* =========================================================
+   Admin Panel — user name cell (avatar + name + badges)
+   ========================================================= */
+.admin-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.admin-user-avatar {
+  flex-shrink: 0;
+  margin-right: 0 !important;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.admin-user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.admin-user-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+  transition: color var(--transition-fast);
+}
+
+.admin-user-name:hover {
+  color: var(--grad-1);
+  text-decoration: underline;
+}
+
+.admin-user-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-user-badges .badge-status {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+  .admin-user-name {
+    max-width: 160px;
+  }
+}
+
+/* =========================================================
    Scrollbar polish
    ========================================================= */
 ::-webkit-scrollbar {

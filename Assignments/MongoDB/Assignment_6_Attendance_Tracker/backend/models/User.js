@@ -40,6 +40,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Maximum number of attendance records this user is allowed to create
+    // in total. 0 means unlimited. Admins always bypass this check
+    // regardless of the value stored here (see attendanceController.js).
+    // An admin can raise/lower this per-user from the Admin Panel.
+    attendanceLimit: {
+      type: Number,
+      default: 50,
+      min: [0, 'Attendance limit cannot be negative'],
+    },
   },
   {
     timestamps: true,

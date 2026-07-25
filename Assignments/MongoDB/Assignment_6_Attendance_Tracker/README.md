@@ -15,8 +15,9 @@ A production-ready, full-stack **Attendance Tracker** built with **MongoDB, Expr
 - Clean **MVC architecture** (Config / Models / Controllers / Routes / Middleware)
 - **JWT authentication** — register/login endpoints, bcrypt password hashing, protected routes
 - **Per-user data ownership** — each attendance record belongs to the user who created it; regular users only ever see their own records
-- **Admin panel API** — list every registered user with their attendance record count, and block/unblock accounts
+- **Admin panel API** — list every registered user with their attendance record count, and block/unblock accounts, change roles, and set per-user record limits
 - **Account blocking** — a blocked user is signed out of any active session immediately and cannot log back in
+- **Per-user attendance record limits** — each "teacher" account has a maximum number of records they can create (default 50, 0 = unlimited), enforced server-side and adjustable per-user by an admin
 - Full **CRUD REST API** for attendance records (all routes require a valid logged-in user)
 - `GET /api/attendance/count` endpoint for dashboard statistics
 - Search, filter (status & date), sort, and pagination support via query params
@@ -27,7 +28,8 @@ A production-ready, full-stack **Attendance Tracker** built with **MongoDB, Expr
 
 ### Frontend
 - **Login & Registration pages** with client-side validation, protected dashboard route, auto-redirect on session expiry
-- **Admin Panel page** (`/admin/users`, admin-only) — see every user, how many records they've marked, and block/unblock any account with one click
+- **Admin Panel page** (`/admin/users`, admin-only) — see every user, how many records they've marked, and block/unblock any account, change roles, or set their attendance record limit, all with one click
+- **Per-user detail view** (`/admin/users/:id`) — click any user to see everything THEY specifically marked: their own stat cards, searchable/sortable/filterable table, and the ability to edit or delete their records
 - Premium **glassmorphism** admin dashboard with animated gradient background
 - Fully responsive layout (mobile, tablet, laptop, desktop)
 - Sticky navbar showing the logged-in user, an **Admin Panel** shortcut (admins only), **dark mode toggle**, and logout
@@ -72,7 +74,8 @@ attendance-tracker/
 │   │   ├── attendance.sample.json
 │   │   └── seed.js
 │   ├── utils/
-│   │   └── generateToken.js
+│   │   ├── generateToken.js
+│   │   └── superAdmin.js
 │   ├── .env.example
 │   ├── .gitignore
 │   ├── package.json
@@ -95,6 +98,7 @@ attendance-tracker/
 │   │   │   ├── AuthContext.jsx
 │   │   │   └── ThemeContext.jsx
 │   │   ├── pages/
+│   │   │   ├── AdminUserDetail.jsx
 │   │   │   ├── AdminUsers.jsx
 │   │   │   ├── Dashboard.jsx
 │   │   │   ├── Login.jsx
@@ -186,9 +190,7 @@ Every attendance record is tied to the user who created it (`createdBy`):
 - **`teacher` role (default for every self-registered account)** — can only see, edit, and delete the attendance records **they personally created**. They will never see another user's records.
 - **`admin` role** — can see and manage **every** user's attendance records.
 
-New accounts **always** register as `teacher` — there is no way to self-grant `admin` through the public registration form (this is enforced server-side). To create an admin account, either:
-- Run `npm run seed` in `backend/`, which creates a demo `admin` account (`demo@attendancepro.com` / `demo1234`) along with sample data, or
-- Manually update a user's `role` field to `"admin"` directly in MongoDB.
+New accounts **always** register as `teacher` — there is no way to self-grant `admin` through the public registration form (this is enforced server-side). An admin can promote any other user to `admin` from the Admin Panel (see below), or you can flip a user's `role` field directly in MongoDB — both work fine, since role is re-checked fresh on every login/request with no caching involved.
 
 ### Admin Panel
 
@@ -196,14 +198,54 @@ Logging in as an `admin` shows an **"Admin Panel"** link in the navbar, leading 
 - See every registered user, their role, join date, and **how many attendance records they've personally marked**
 - **Block** a user — they are signed out immediately (even mid-session) and cannot log back in until unblocked
 - **Unblock** a previously blocked user, restoring their access
+- **Promote a "teacher" to "admin"**, or **demote an "admin" back to "teacher"**
+- **Set a "teacher"'s attendance record limit** — how many total records that person is allowed to create (`0` = unlimited)
 
 Non-admin users are redirected away from `/admin/users` if they try to visit it directly, and the underlying `/api/admin/*` endpoints reject non-admin requests with a 403 regardless of what the frontend shows.
 
-| Method | Endpoint                        | Description                                | Access        |
-|--------|-----------------------------------|----------------------------------------------|---------------|
-| GET    | `/api/admin/users`                | List all users + their attendance record count | Private/Admin |
-| PUT    | `/api/admin/users/:id/block`      | Block a user (cannot block yourself)          | Private/Admin |
-| PUT    | `/api/admin/users/:id/unblock`    | Unblock a user                                | Private/Admin |
+| Method | Endpoint                        | Description                                    | Access        |
+|--------|-----------------------------------|--------------------------------------------------|---------------|
+| GET    | `/api/admin/users`                | List all users + their attendance record count    | Private/Admin |
+| PUT    | `/api/admin/users/:id/block`      | Block a user (cannot block yourself or super admin) | Private/Admin |
+| PUT    | `/api/admin/users/:id/unblock`    | Unblock a user                                    | Private/Admin |
+| PUT    | `/api/admin/users/:id/role`       | Change a user's role — body `{ "role": "admin" \| "teacher" }` (cannot target yourself-to-demote or super admin) | Private/Admin |
+| PUT    | `/api/admin/users/:id/limit`      | Set a user's attendance record limit — body `{ "limit": number }` (`0` = unlimited) | Private/Admin |
+
+### Attendance record limits
+
+Every `teacher` account has a maximum number of attendance records they're allowed to create in total (**default: 50**). This is enforced on the backend in `createAttendance` — once a user hits their limit, further creation attempts are rejected with a clear error message, and the frontend disables the "Add Attendance" button and shows a "limit reached" notice (existing records can still be edited even at the limit — only *creating new* records is blocked).
+
+- `admin` accounts always bypass this check entirely — the limit field on their user document is irrelevant.
+- An admin can raise or lower any teacher's limit at any time from the Admin Panel's **Record Limit** column (enter a new number, then click the save icon). Set it to `0` for unlimited.
+- The Dashboard shows a live "X / Y records used" bar for any user with a limit set, so they always know where they stand.
+
+### Super Admin — permanent, auto-created on startup
+
+Set both of these in `backend/.env`:
+
+```dotenv
+SUPER_ADMIN_EMAIL=wa5134810@gmail.com
+SUPER_ADMIN_PASSWORD=demo1234@
+```
+
+> ⚠️ Change the password to something private before deploying anywhere real, and double-check the email for typos before first startup.
+
+This account is special:
+- **Created automatically the moment the server starts** — no registration or seed script needed. Just start the backend (`npm run dev`) and log in with the email/password above.
+- **Always admin** — if the role is ever changed directly in the database, it's automatically restored to `admin` the next time it logs in
+- **Can never be blocked** — attempts to block it are rejected with a 403, from the API directly or the Admin Panel
+- **Can never be demoted** — its role can't be changed away from `admin` through the admin panel or the API
+- Shown with a **"Protected"** badge in the Admin Panel, with block/role-change actions disabled for that row
+
+### Per-user detail view
+
+Clicking a user's name (or the "View" button) in the Admin Panel opens `/admin/users/:id` — a dedicated page scoped to just that one user, showing:
+- Their own stat cards (total/present/absent/percentage), computed only from records **they** created
+- A searchable, sortable, filterable table of every record they've marked — exportable to PDF/Excel/print just like the main dashboard
+- Their attendance limit usage bar (if they have one set)
+- The ability to **edit or delete** their records (useful for correcting mistakes) — there's intentionally no "Add" button here, since creating a record always attributes it to whoever is logged in, and adding on someone else's behalf would misattribute it
+
+Under the hood, this reuses the same `GET /api/attendance` and `GET /api/attendance/count` endpoints as the normal dashboard, but with an extra `?viewUserId=<id>` query param that **only works for admins** — a non-admin passing this param has it silently ignored and still only sees their own data.
 
 ---
 

@@ -11,12 +11,11 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
+const User = require('./models/User');
+const { bootstrapSuperAdmin } = require('./utils/superAdmin');
 
 // Load environment variables from .env
 dotenv.config();
-
-// Connect to MongoDB
-connectDB();
 
 const app = express();
 
@@ -56,9 +55,21 @@ app.use(errorHandler);
 // ----------------- Start Server -----------------
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+/**
+ * Connects to the database, ensures the permanent super admin account
+ * exists (creating or healing it as needed), and only then starts
+ * accepting HTTP requests.
+ */
+const startServer = async () => {
+  await connectDB();
+  await bootstrapSuperAdmin(User);
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+};
+
+startServer();
 
 // Handle unhandled promise rejections gracefully
 process.on('unhandledRejection', (err) => {

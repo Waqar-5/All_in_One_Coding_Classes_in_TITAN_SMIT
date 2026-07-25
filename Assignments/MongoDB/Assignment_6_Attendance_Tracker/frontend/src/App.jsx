@@ -8,13 +8,14 @@ import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
+import AdminUserDetail from './pages/AdminUserDetail.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 /**
  * Root application component. Renders the sticky navbar, the routed
  * page content, and the footer within a full-height flex shell.
  * - "/" (Dashboard) requires any logged-in user.
- * - "/admin/users" additionally requires the "admin" role.
+ * - "/admin/users" and "/admin/users/:id" additionally require the "admin" role.
  */
 function App() {
   const { isAuthenticated } = useAuth();
@@ -38,6 +39,14 @@ function App() {
           element={
             <ProtectedRoute adminOnly>
               <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:id"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminUserDetail />
             </ProtectedRoute>
           }
         />

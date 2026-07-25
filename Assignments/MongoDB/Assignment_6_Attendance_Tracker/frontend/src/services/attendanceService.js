@@ -100,9 +100,11 @@ export const deleteAttendanceRecord = async (id) => {
 
 /**
  * Fetch dashboard statistics (total, present, absent, percentage).
+ * Optionally pass { viewUserId } — admins only — to get stats scoped to
+ * one specific user instead of their own account.
  */
-export const fetchAttendanceStats = async () => {
-  const { data } = await api.get('/attendance/count');
+export const fetchAttendanceStats = async (params = {}) => {
+  const { data } = await api.get('/attendance/count', { params });
   return data;
 };
 

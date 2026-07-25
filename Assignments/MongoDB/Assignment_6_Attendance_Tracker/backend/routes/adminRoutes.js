@@ -6,14 +6,17 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllUsers, blockUser, unblockUser } = require('../controllers/adminController');
+const { getAllUsers, getUserById, blockUser, unblockUser, changeUserRole, setUserLimit } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
 // Every route below requires a logged-in admin
 router.use(protect, authorize('admin'));
 
 router.get('/users', getAllUsers);
+router.get('/users/:id', getUserById);
 router.put('/users/:id/block', blockUser);
 router.put('/users/:id/unblock', unblockUser);
+router.put('/users/:id/role', changeUserRole);
+router.put('/users/:id/limit', setUserLimit);
 
 module.exports = router;

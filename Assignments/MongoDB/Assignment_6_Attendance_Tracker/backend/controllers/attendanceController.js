@@ -12,16 +12,29 @@
 
 const mongoose = require('mongoose');
 const Attendance = require('../models/Attendance');
+const User = require('../models/User');
 const asyncHandler = require('../middleware/asyncHandler');
 const ApiError = require('../middleware/ApiError');
 
 /**
  * Returns a Mongo filter fragment that scopes queries to the current user,
- * unless that user is an admin (in which case no ownership restriction
- * is applied and they can see everyone's records).
+ * unless that user is an admin.
+ *
+ * Admins normally see everyone's records (no restriction). However, if an
+ * admin passes a `?viewUserId=<id>` query param, they are scoped down to
+ * just THAT user's records — this powers the Admin Panel's per-user detail
+ * view ("click a user, see everything they've marked"). Non-admins can
+ * never use `viewUserId` to see someone else's data — it's silently
+ * ignored for them.
  */
 const buildOwnershipFilter = (req) => {
-  if (req.user.role === 'admin') return {};
+  if (req.user.role === 'admin') {
+    const { viewUserId } = req.query;
+    if (viewUserId && mongoose.Types.ObjectId.isValid(viewUserId)) {
+      return { createdBy: viewUserId };
+    }
+    return {};
+  }
   return { createdBy: req.user._id };
 };
 
@@ -46,6 +59,18 @@ const createAttendance = asyncHandler(async (req, res) => {
 
   if (!studentName || !status) {
     throw new ApiError(400, 'Student name and status are required');
+  }
+
+  // Enforce the per-user record limit (0 = unlimited). Admins always
+  // bypass this — the limit only applies to regular "teacher" accounts.
+  if (req.user.role !== 'admin' && req.user.attendanceLimit > 0) {
+    const currentCount = await Attendance.countDocuments({ createdBy: req.user._id });
+    if (currentCount >= req.user.attendanceLimit) {
+      throw new ApiError(
+        403,
+        `You've reached your limit of ${req.user.attendanceLimit} attendance records. Ask an admin to increase your limit.`
+      );
+    }
   }
 
   const attendance = await Attendance.create({
@@ -236,6 +261,32 @@ const getAttendanceStats = asyncHandler(async (req, res) => {
 
   const percentage = total > 0 ? Number(((present / total) * 100).toFixed(2)) : 0;
 
+  // Limit info applies to whichever single user's records are actually
+  // being counted: the logged-in user themself, OR — if an admin passed
+  // ?viewUserId=<id> to drill into someone else's records — that target
+  // user. It's meaningless for an admin's own unscoped "everyone" view.
+  const { viewUserId } = req.query;
+  let limitInfo = null;
+
+  if (req.user.role !== 'admin') {
+    const limit = req.user.attendanceLimit || 0;
+    limitInfo = {
+      limit, // 0 means unlimited
+      used: total,
+      remaining: limit > 0 ? Math.max(limit - total, 0) : null,
+    };
+  } else if (viewUserId && mongoose.Types.ObjectId.isValid(viewUserId)) {
+    const targetUser = await User.findById(viewUserId);
+    if (targetUser) {
+      const limit = targetUser.attendanceLimit || 0;
+      limitInfo = {
+        limit,
+        used: total,
+        remaining: limit > 0 ? Math.max(limit - total, 0) : null,
+      };
+    }
+  }
+
   res.status(200).json({
     success: true,
     data: {
@@ -243,6 +294,7 @@ const getAttendanceStats = asyncHandler(async (req, res) => {
       present,
       absent,
       percentage,
+      limitInfo,
     },
   });
 });

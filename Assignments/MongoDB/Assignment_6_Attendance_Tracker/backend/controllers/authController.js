@@ -5,6 +5,7 @@ const User = require('../models/User');
 const asyncHandler = require('../middleware/asyncHandler');
 const ApiError = require('../middleware/ApiError');
 const generateToken = require('../utils/generateToken');
+const { isSuperAdminEmail } = require('../utils/superAdmin');
 
 /**
  * Strips sensitive fields before sending the user object back to the client.
@@ -14,6 +15,8 @@ const sanitizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  isBlocked: user.isBlocked,
+  attendanceLimit: user.attendanceLimit,
   createdAt: user.createdAt,
 });
 
@@ -29,20 +32,22 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Name, email and password are required');
   }
 
-  const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
     throw new ApiError(400, 'An account with this email already exists');
   }
 
-  // NOTE: role is intentionally NOT read from req.body. Every self-registered
-  // account starts as "teacher" — admin accounts (which can see every user's
-  // attendance records) must be granted manually, e.g. via the seed script
-  // or directly in the database, never through public registration.
+  // NOTE: role is intentionally NOT read from req.body for everyone else —
+  // every self-registered account starts as "teacher". The ONE exception is
+  // the permanent super admin email (SUPER_ADMIN_EMAIL in .env), which is
+  // always granted "admin" automatically, even on first registration.
   const user = await User.create({
     name: name.trim(),
-    email: email.toLowerCase().trim(),
+    email: normalizedEmail,
     password,
-    role: 'teacher',
+    role: isSuperAdminEmail(normalizedEmail) ? 'admin' : 'teacher',
   });
 
   const token = generateToken(user._id);
@@ -72,6 +77,15 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!user || !(await user.comparePassword(password))) {
     throw new ApiError(401, 'Invalid email or password');
+  }
+
+  // Self-healing: the super admin email is ALWAYS admin and ALWAYS unblocked,
+  // no matter what the database currently says (e.g. if it was ever changed
+  // by mistake). This runs on every login so the guarantee always holds.
+  if (isSuperAdminEmail(user.email) && (user.role !== 'admin' || user.isBlocked)) {
+    user.role = 'admin';
+    user.isBlocked = false;
+    await user.save();
   }
 
   if (user.isBlocked) {

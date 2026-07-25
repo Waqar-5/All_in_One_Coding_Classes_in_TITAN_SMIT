@@ -6,14 +6,16 @@ import { FaEnvelope, FaLock, FaSignInAlt, FaClipboardCheck } from 'react-icons/f
 import { useAuth } from '../context/AuthContext.jsx';
 
 /**
- * Login page. On success, redirects the user to the page they originally
- * tried to visit (if redirected here by ProtectedRoute), or to the dashboard.
+ * Login page. On success:
+ *   - If ProtectedRoute redirected here from a specific page, go back there.
+ *   - Otherwise, admins land on the Admin Panel; everyone else lands on
+ *     the regular Dashboard.
  */
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const explicitFrom = location.state?.from?.pathname;
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -38,7 +40,7 @@ const Login = () => {
 
     setSubmitting(true);
     try {
-      await login(formData);
+      const res = await login(formData);
       Swal.fire({
         toast: true,
         position: 'top-end',
@@ -47,7 +49,10 @@ const Login = () => {
         showConfirmButton: false,
         timer: 2000,
       });
-      navigate(from, { replace: true });
+
+      const isAdmin = res?.data?.role === 'admin';
+      const destination = explicitFrom || (isAdmin ? '/admin/users' : '/');
+      navigate(destination, { replace: true });
     } catch (err) {
       Swal.fire({
         icon: 'error',

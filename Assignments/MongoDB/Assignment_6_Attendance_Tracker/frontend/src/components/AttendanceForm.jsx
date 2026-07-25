@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaUserPlus, FaSyncAlt, FaSave, FaUser, FaCalendarAlt, FaListAlt } from 'react-icons/fa';
+import { FaUserPlus, FaSyncAlt, FaSave, FaUser, FaCalendarAlt, FaListAlt, FaLock } from 'react-icons/fa';
 
 const emptyForm = {
   studentName: '',
@@ -11,9 +11,11 @@ const emptyForm = {
 /**
  * Form used to create a new attendance record or update an existing one.
  * When `editingRecord` is provided, the form switches into "update" mode
- * and pre-fills the fields.
+ * and pre-fills the fields. When `limitReached` is true and the form is
+ * NOT in edit mode, new-record creation is blocked (editing/updating an
+ * existing record is still allowed, since that doesn't add a new record).
  */
-const AttendanceForm = ({ editingRecord, onSubmit, onCancelEdit, submitting }) => {
+const AttendanceForm = ({ editingRecord, onSubmit, onCancelEdit, submitting, limitReached = false }) => {
   const [formData, setFormData] = useState(emptyForm);
   const [errors, setErrors] = useState({});
 
@@ -124,11 +126,11 @@ const AttendanceForm = ({ editingRecord, onSubmit, onCancelEdit, submitting }) =
           </div>
         </div>
 
-        <div className="d-flex flex-wrap gap-2 mt-4">
+        <div className="d-flex flex-wrap align-items-center gap-2 mt-4">
           <button
             type="submit"
             className={`btn ${editingRecord ? 'btn-gradient-success' : 'btn-gradient-primary'}`}
-            disabled={submitting}
+            disabled={submitting || (!editingRecord && limitReached)}
           >
             {editingRecord ? <FaSave className="me-2" /> : <FaUserPlus className="me-2" />}
             {submitting
@@ -141,6 +143,11 @@ const AttendanceForm = ({ editingRecord, onSubmit, onCancelEdit, submitting }) =
             <FaSyncAlt className="me-2" />
             Reset
           </button>
+          {!editingRecord && limitReached && (
+            <span className="small text-danger fw-semibold d-flex align-items-center gap-1">
+              <FaLock /> Record limit reached — contact an admin to add more
+            </span>
+          )}
         </div>
       </form>
     </motion.div>
