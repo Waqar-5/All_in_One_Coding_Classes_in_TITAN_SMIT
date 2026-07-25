@@ -1,13 +1,38 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaClipboardCheck, FaMoon, FaSun } from 'react-icons/fa';
+import { FaClipboardCheck, FaMoon, FaSun, FaSignOutAlt, FaUserShield } from 'react-icons/fa';
+import Swal from 'sweetalert2';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 /**
- * Sticky top navigation bar with brand logo and dark/light mode toggle.
+ * Sticky top navigation bar with brand logo, current user info,
+ * dark/light mode toggle, and logout action.
  */
 const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Log out?',
+      text: 'You will need to log in again to access the dashboard.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, log out',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#6366f1',
+      cancelButtonColor: '#8b87a0',
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      logout();
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <motion.nav
@@ -27,12 +52,17 @@ const Navbar = () => {
         </a>
 
         <div className="d-flex align-items-center gap-3">
+          {user?.role === 'admin' && (
+            <Link to="/admin/users" className="btn btn-outline-soft btn-sm d-none d-sm-inline-flex align-items-center gap-1">
+              <FaUserShield /> Admin Panel
+            </Link>
+          )}
           <div className="d-none d-md-flex flex-column text-end me-2">
             <small className="fw-semibold" style={{ color: 'var(--text-primary)' }}>
-              Admin Dashboard
+              {user?.name || 'Admin Dashboard'}
             </small>
             <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-              Manage student attendance
+              {user?.email || 'Manage student attendance'}
             </small>
           </div>
           <button
@@ -42,6 +72,14 @@ const Navbar = () => {
             aria-label="Toggle dark mode"
           >
             {theme === 'light' ? <FaMoon /> : <FaSun />}
+          </button>
+          <button
+            className="theme-toggle-btn"
+            onClick={handleLogout}
+            title="Log out"
+            aria-label="Log out"
+          >
+            <FaSignOutAlt />
           </button>
         </div>
       </div>

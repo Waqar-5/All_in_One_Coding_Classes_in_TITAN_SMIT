@@ -12,14 +12,115 @@
     {
       "key": "attendanceId",
       "value": ""
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "targetUserId",
+      "value": ""
     }
   ],
   "item": [
     {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Users (with record counts)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Block User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{targetUserId}}/block",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{targetUserId}}", "block"]
+            }
+          }
+        },
+        {
+          "name": "Unblock User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{targetUserId}}/unblock",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "{{targetUserId}}", "unblock"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Create Attendance",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"studentName\": \"John Carter\",\n  \"date\": \"2026-07-24\",\n  \"status\": \"Present\"\n}"
@@ -35,6 +136,7 @@
       "name": "Get All Attendance (with filters)",
       "request": {
         "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
         "url": {
           "raw": "{{baseUrl}}/attendance?search=&status=&date=&sortBy=date&order=desc&page=1&limit=10",
           "host": ["{{baseUrl}}"],
@@ -55,6 +157,7 @@
       "name": "Get Attendance By ID",
       "request": {
         "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
         "url": {
           "raw": "{{baseUrl}}/attendance/{{attendanceId}}",
           "host": ["{{baseUrl}}"],
@@ -66,7 +169,10 @@
       "name": "Update Attendance",
       "request": {
         "method": "PUT",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"status\": \"Absent\"\n}"
@@ -82,6 +188,7 @@
       "name": "Delete Attendance",
       "request": {
         "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
         "url": {
           "raw": "{{baseUrl}}/attendance/{{attendanceId}}",
           "host": ["{{baseUrl}}"],
@@ -93,6 +200,7 @@
       "name": "Get Attendance Stats (count)",
       "request": {
         "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
         "url": {
           "raw": "{{baseUrl}}/attendance/count",
           "host": ["{{baseUrl}}"],

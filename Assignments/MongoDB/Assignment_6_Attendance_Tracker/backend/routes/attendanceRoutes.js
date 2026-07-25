@@ -14,6 +14,10 @@ const {
   deleteAttendance,
   getAttendanceStats,
 } = require('../controllers/attendanceController');
+const { protect } = require('../middleware/auth');
+
+// All attendance routes require a valid logged-in user
+router.use(protect);
 
 // GET /api/attendance/count -> statistics (must come before /:id)
 router.get('/count', getAttendanceStats);

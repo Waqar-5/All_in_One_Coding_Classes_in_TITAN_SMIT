@@ -3,18 +3,44 @@ import { Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import AdminUsers from './pages/AdminUsers.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 
 /**
  * Root application component. Renders the sticky navbar, the routed
  * page content, and the footer within a full-height flex shell.
+ * - "/" (Dashboard) requires any logged-in user.
+ * - "/admin/users" additionally requires the "admin" role.
  */
 function App() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="app-shell">
-      <Navbar />
+      {isAuthenticated && <Navbar />}
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="*"
           element={
@@ -25,7 +51,7 @@ function App() {
           }
         />
       </Routes>
-      <Footer />
+      {isAuthenticated && <Footer />}
     </div>
   );
 }

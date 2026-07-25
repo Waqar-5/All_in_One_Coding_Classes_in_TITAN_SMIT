@@ -589,6 +589,40 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* =========================================================
+   Auth pages (Login / Register)
+   ========================================================= */
+.auth-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 2.25rem 2rem;
+}
+
+.auth-card .brand-icon-wrap {
+  width: 56px;
+  height: 56px;
+  font-size: 1.6rem;
+  display: flex;
+}
+
+.auth-card a {
+  color: var(--grad-1);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-card a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
    Scrollbar polish
    ========================================================= */
 ::-webkit-scrollbar {

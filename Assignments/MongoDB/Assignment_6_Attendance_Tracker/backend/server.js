@@ -7,6 +7,8 @@ const dotenv = require('dotenv');
 
 const connectDB = require('./config/db');
 const attendanceRoutes = require('./routes/attendanceRoutes');
+const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -43,6 +45,8 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/attendance', attendanceRoutes);
 
 // ----------------- Error Handling -----------------

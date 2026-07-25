@@ -201,7 +201,7 @@ const Dashboard = () => {
           Welcome back 👋
         </h2>
         <p className="mb-0" style={{ color: 'rgba(255,255,255,0.85)' }}>
-          Here's an overview of your attendance records today.
+          Here's an overview of the attendance records you've marked.
         </p>
       </motion.div>
 

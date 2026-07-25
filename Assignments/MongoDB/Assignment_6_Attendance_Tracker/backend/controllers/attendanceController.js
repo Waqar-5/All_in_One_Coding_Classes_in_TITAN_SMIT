@@ -1,6 +1,14 @@
 // controllers/attendanceController.js
 // Contains all business logic for the Attendance resource.
 // Each function is wrapped with asyncHandler to avoid repetitive try/catch.
+//
+// OWNERSHIP MODEL:
+// Every attendance record has a `createdBy` field tied to the logged-in
+// user who created it. Regular users ("teacher" role) only ever see and
+// manage their OWN records. Users with the "admin" role can see and manage
+// EVERY record. This is enforced centrally via the `buildOwnershipFilter`
+// and `assertCanAccessRecord` helpers below, so it can't be forgotten in
+// any individual route.
 
 const mongoose = require('mongoose');
 const Attendance = require('../models/Attendance');
@@ -8,9 +16,30 @@ const asyncHandler = require('../middleware/asyncHandler');
 const ApiError = require('../middleware/ApiError');
 
 /**
- * @desc    Create a new attendance record
+ * Returns a Mongo filter fragment that scopes queries to the current user,
+ * unless that user is an admin (in which case no ownership restriction
+ * is applied and they can see everyone's records).
+ */
+const buildOwnershipFilter = (req) => {
+  if (req.user.role === 'admin') return {};
+  return { createdBy: req.user._id };
+};
+
+/**
+ * Throws a 403 if the given record does not belong to the current user
+ * and the current user is not an admin.
+ */
+const assertCanAccessRecord = (req, record) => {
+  const isOwner = record.createdBy.toString() === req.user._id.toString();
+  if (!isOwner && req.user.role !== 'admin') {
+    throw new ApiError(403, 'You are not authorized to access this record');
+  }
+};
+
+/**
+ * @desc    Create a new attendance record (owned by the logged-in user)
  * @route   POST /api/attendance
- * @access  Public
+ * @access  Private
  */
 const createAttendance = asyncHandler(async (req, res) => {
   const { studentName, date, status } = req.body;
@@ -19,34 +48,11 @@ const createAttendance = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Student name and status are required');
   }
 
-  // 👇 ADD THE DUPLICATE CHECK HERE
-
-const attendanceDate = new Date(date || Date.now());
-
-const startOfDay = new Date(attendanceDate);
-startOfDay.setHours(0, 0, 0, 0);
-
-const endOfDay = new Date(attendanceDate);
-endOfDay.setHours(23, 59, 59, 999);
-
-const existingAttendance = await Attendance.findOne({
-  studentName: studentName.trim(),
-  date: {
-    $gte: startOfDay,
-    $lte: endOfDay,
-  },
-});
-
-if (existingAttendance) {
-  throw new ApiError(
-    400,
-    "Attendance has already been marked for this student today."
-  );
-}
   const attendance = await Attendance.create({
     studentName: studentName.trim(),
     date: date || Date.now(),
     status,
+    createdBy: req.user._id,
   });
 
   res.status(201).json({
@@ -57,10 +63,11 @@ if (existingAttendance) {
 });
 
 /**
- * @desc    Get all attendance records with optional search, filter, sort & pagination
+ * @desc    Get attendance records with optional search, filter, sort & pagination.
+ *          Regular users only see their own records; admins see everyone's.
  * @route   GET /api/attendance
  * @query   search, status, date, sortBy, order, page, limit
- * @access  Public
+ * @access  Private
  */
 const getAttendanceRecords = asyncHandler(async (req, res) => {
   const {
@@ -73,8 +80,8 @@ const getAttendanceRecords = asyncHandler(async (req, res) => {
     limit = 10,
   } = req.query;
 
-  // Build dynamic filter object
-  const filter = {};
+  // Start with the ownership scope, then layer on search/filter params
+  const filter = { ...buildOwnershipFilter(req) };
 
   if (search) {
     filter.studentName = { $regex: search, $options: 'i' };
@@ -121,9 +128,10 @@ const getAttendanceRecords = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get a single attendance record by ID
+ * @desc    Get a single attendance record by ID (must be owned by the
+ *          requesting user, unless they're an admin)
  * @route   GET /api/attendance/:id
- * @access  Public
+ * @access  Private
  */
 const getAttendanceById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -138,6 +146,8 @@ const getAttendanceById = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Attendance record not found');
   }
 
+  assertCanAccessRecord(req, record);
+
   res.status(200).json({
     success: true,
     data: record,
@@ -145,9 +155,10 @@ const getAttendanceById = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Update an attendance record
+ * @desc    Update an attendance record (must be owned by the requesting
+ *          user, unless they're an admin)
  * @route   PUT /api/attendance/:id
- * @access  Public
+ * @access  Private
  */
 const updateAttendance = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -163,6 +174,8 @@ const updateAttendance = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Attendance record not found');
   }
 
+  assertCanAccessRecord(req, record);
+
   if (studentName !== undefined) record.studentName = studentName.trim();
   if (date !== undefined) record.date = date;
   if (status !== undefined) record.status = status;
@@ -177,9 +190,10 @@ const updateAttendance = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Delete an attendance record
+ * @desc    Delete an attendance record (must be owned by the requesting
+ *          user, unless they're an admin)
  * @route   DELETE /api/attendance/:id
- * @access  Public
+ * @access  Private
  */
 const deleteAttendance = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -194,6 +208,8 @@ const deleteAttendance = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Attendance record not found');
   }
 
+  assertCanAccessRecord(req, record);
+
   await record.deleteOne();
 
   res.status(200).json({
@@ -204,15 +220,18 @@ const deleteAttendance = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get attendance statistics (total, present, absent, percentage)
+ * @desc    Get attendance statistics (total, present, absent, percentage).
+ *          Scoped to the logged-in user's own records, unless they're an admin.
  * @route   GET /api/attendance/count
- * @access  Public
+ * @access  Private
  */
 const getAttendanceStats = asyncHandler(async (req, res) => {
+  const ownershipFilter = buildOwnershipFilter(req);
+
   const [total, present, absent] = await Promise.all([
-    Attendance.countDocuments({}),
-    Attendance.countDocuments({ status: 'Present' }),
-    Attendance.countDocuments({ status: 'Absent' }),
+    Attendance.countDocuments({ ...ownershipFilter }),
+    Attendance.countDocuments({ ...ownershipFilter, status: 'Present' }),
+    Attendance.countDocuments({ ...ownershipFilter, status: 'Absent' }),
   ]);
 
   const percentage = total > 0 ? Number(((present / total) * 100).toFixed(2)) : 0;

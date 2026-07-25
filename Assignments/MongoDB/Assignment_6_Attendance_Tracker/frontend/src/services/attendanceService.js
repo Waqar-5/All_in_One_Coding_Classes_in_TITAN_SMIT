@@ -4,6 +4,7 @@
 // easy to change (e.g. for production deployment) in a single place.
 
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -15,12 +16,43 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Global response interceptor to normalize error messages
+// Attach the JWT token (if present) to every outgoing request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('attendance-token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Global response interceptor to normalize error messages and handle
+// expired/invalid sessions (401) or a mid-session account block (403)
+// by clearing local auth state and redirecting to /login.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
     const message =
       error.response?.data?.message || error.message || 'Something went wrong. Please try again.';
+
+    const isBlockedMessage = status === 403 && message.toLowerCase().includes('blocked');
+
+    if (status === 401 || isBlockedMessage) {
+      localStorage.removeItem('attendance-token');
+      localStorage.removeItem('attendance-user');
+      if (!window.location.pathname.startsWith('/login')) {
+        if (isBlockedMessage) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Account Blocked',
+            text: message,
+            confirmButtonColor: '#6366f1',
+          });
+        }
+        window.location.href = '/login';
+      }
+    }
+
     return Promise.reject(new Error(message));
   }
 );
