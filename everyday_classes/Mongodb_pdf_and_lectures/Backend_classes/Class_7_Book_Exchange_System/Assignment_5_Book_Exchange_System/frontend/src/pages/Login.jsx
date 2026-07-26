@@ -83,6 +83,12 @@ export default function Login() {
             onChange={handleChange("password")}
             error={errors.password}
           />
+          <Link
+            to="/forgot-password"
+            className="-mt-3 inline-block text-xs font-semibold text-moss-600 dark:text-brass-400 hover:underline"
+          >
+            Forgot password?
+          </Link>
 
           <Button type="submit" variant="primary" icon={FiLogIn} loading={submitting} className="w-full">
             Log in

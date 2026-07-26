@@ -7,8 +7,10 @@ const Book = require("../models/book");
 const Exchange = require("../models/Exchange");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const validator = require("validator");
 const { deleteUploadedFile } = require("../utils/fileHelpers");
+const sendEmail = require("../utils/sendEmail");
 
 // ======================================================
 // Register User
@@ -212,6 +214,21 @@ const loginUser = async (req, res) => {
 
                 success: false,
                 message: "Invalid Email or Password."
+
+            });
+
+        }
+
+        // ===========================
+        // Blocked Check
+        // ===========================
+
+        if (user.isBlocked) {
+
+            return res.status(401).json({
+
+                success: false,
+                message: "Your account has been blocked by an admin. Contact support if you think this is a mistake."
 
             });
 
@@ -489,14 +506,218 @@ const changePassword = async (req, res) => {
 };
 
 // ======================================================
-// Export Controller
+// Forgot Password
+// POST /api/auth/forgot-password
+// Public Route — always returns a generic success message, whether or
+// not the email exists, so this can't be used to enumerate accounts.
 // ======================================================
+
+const forgotPassword = async (req, res) => {
+
+    try {
+
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required." });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        const genericResponse = {
+            success: true,
+            message: "If an account exists for that email, a password reset link has been sent."
+        };
+
+        if (!user) {
+            // Don't reveal whether the email is registered.
+            return res.status(200).json(genericResponse);
+        }
+
+        // Generate a random token — only its SHA-256 hash is stored in
+        // the DB. The raw token goes in the email link and is never
+        // saved anywhere, so a database leak alone can't be used to
+        // reset anyone's password.
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password/${rawToken}`;
+
+        try {
+
+            await sendEmail({
+                to: user.email,
+                subject: "Reset your Chapter & Verse password",
+                html: `
+                    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+                        <h2>Reset your password</h2>
+                        <p>Hi ${user.name},</p>
+                        <p>Someone requested a password reset for your Chapter &amp; Verse account. If this wasn't you, you can safely ignore this email.</p>
+                        <p style="margin: 24px 0;">
+                            <a href="${resetUrl}" style="background:#3F6B4F;color:#fff;padding:12px 24px;border-radius:9999px;text-decoration:none;">
+                                Reset Password
+                            </a>
+                        </p>
+                        <p>Or copy this link into your browser:<br>${resetUrl}</p>
+                        <p>This link expires in 15 minutes.</p>
+                    </div>
+                `
+            });
+
+        } catch (emailError) {
+
+            // Sending failed — don't leave a valid dangling token behind.
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save();
+
+            console.error("Failed to send reset email:", emailError.message);
+
+            return res.status(500).json({
+                success: false,
+                message: "Couldn't send the reset email. Please try again later, or contact support."
+            });
+
+        }
+
+        res.status(200).json(genericResponse);
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Reset Password
+// POST /api/auth/reset-password/:token
+// Public Route
+// ======================================================
+
+const resetPassword = async (req, res) => {
+
+    try {
+
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ success: false, message: "New password must be at least 6 characters." });
+        }
+
+        const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+
+            return res.status(400).json({
+
+                success: false,
+                message: "This reset link is invalid or has expired. Please request a new one."
+
+            });
+
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        res.status(200).json({
+
+            success: true,
+            message: "Password reset successfully. You can now log in."
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
 
 // ======================================================
 // Get All Users (Admin)
 // GET /api/auth/users
 // Admin Route
 // ======================================================
+
+// ======================================================
+// Get A Specific User's Profile + Their Books (Admin)
+// GET /api/auth/users/:id
+// Admin Route
+// ======================================================
+
+const getUserDetailsAdmin = async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        // Every book this user has ever listed, including soft-deleted
+        // ones (an admin should be able to see the full picture) — most
+        // recent first.
+        const books = await Book.find({ owner: user._id }).sort({ createdAt: -1 });
+
+        const stats = {
+            totalBooks: books.length,
+            activeBooks: books.filter((b) => !b.isDeleted).length,
+            exchangedBooks: books.filter((b) => b.status === "Exchanged").length
+        };
+
+        res.status(200).json({
+
+            success: true,
+            user,
+            books,
+            stats
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
 
 const getAllUsers = async (req, res) => {
 
@@ -606,12 +827,12 @@ const updateUserRole = async (req, res) => {
 // Admin Route — soft delete / restore, mirrors book soft-delete
 // ======================================================
 
-const toggleUserDeleted = async (req, res) => {
+const toggleUserBlocked = async (req, res) => {
 
     try {
 
         if (req.params.id === req.user._id.toString()) {
-            return res.status(400).json({ success: false, message: "You can't delete your own account." });
+            return res.status(400).json({ success: false, message: "You can't block your own account." });
         }
 
         const user = await User.findById(req.params.id);
@@ -620,13 +841,68 @@ const toggleUserDeleted = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found." });
         }
 
-        user.isDeleted = !user.isDeleted;
+        // The bootstrap admin (set via ADMIN_EMAIL) should never be
+        // lockable out by another admin — it's the account of last resort.
+        if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL.toLowerCase()) {
+            return res.status(400).json({ success: false, message: "The bootstrap admin account can't be blocked." });
+        }
+
+        user.isBlocked = !user.isBlocked;
         await user.save();
 
         res.status(200).json({
 
             success: true,
-            message: user.isDeleted ? "User deactivated." : "User restored.",
+            message: user.isBlocked ? "User blocked. They'll be logged out and can't log back in until unblocked." : "User unblocked.",
+            user
+
+        });
+
+    }
+
+    catch (error) {
+
+        res.status(500).json({
+
+            success: false,
+            message: error.message
+
+        });
+
+    }
+
+};
+
+// ======================================================
+// Set A User's Book Listing Limit (Admin)
+// PATCH /api/auth/users/:id/book-limit
+// Admin Route — bookLimit: number to cap listings, or null for no limit
+// ======================================================
+
+const updateUserBookLimit = async (req, res) => {
+
+    try {
+
+        const { bookLimit } = req.body;
+
+        if (bookLimit !== null && (typeof bookLimit !== "number" || bookLimit < 0)) {
+            return res.status(400).json({ success: false, message: "Book limit must be a non-negative number, or null for no limit." });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { bookLimit },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        res.status(200).json({
+
+            success: true,
+            message: bookLimit === null ? `${user.name}'s book limit removed.` : `${user.name} can now list up to ${bookLimit} book(s).`,
             user
 
         });
@@ -657,9 +933,13 @@ module.exports = {
     getMe,
     updateProfile,
     changePassword,
+    forgotPassword,
+    resetPassword,
     getAllUsers,
+    getUserDetailsAdmin,
     updateUserRole,
-    toggleUserDeleted
+    toggleUserBlocked,
+    updateUserBookLimit
 
 };
 

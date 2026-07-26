@@ -52,9 +52,22 @@ const addBook = async (req, res) => {
             isbn,
             location,
             tags,
-            status
+            status,
+            readLink
 
         } = req.body;
+
+        // req.files comes from upload.fields([{ name: "image" }, { name: "pdfFile" }])
+        // — each is an array (even with maxCount: 1), or undefined if not sent.
+        const imageFile = req.files?.image?.[0];
+        const pdfFile = req.files?.pdfFile?.[0];
+
+        // Cleans up anything Multer already wrote to disk before a later
+        // validation check fails, so nothing gets orphaned in /uploads.
+        const cleanupUploadedFiles = () => {
+            if (imageFile) deleteImageFile(`uploads/${imageFile.filename}`);
+            if (pdfFile) deleteImageFile(`uploads/${pdfFile.filename}`);
+        };
 
         // ===========================
         // Required Validation
@@ -70,9 +83,7 @@ const addBook = async (req, res) => {
 
         ) {
 
-            // Multer already wrote the file to disk before this check ran —
-            // don't leave an orphaned upload behind.
-            if (req.file) deleteImageFile(`uploads/${req.file.filename}`);
+            cleanupUploadedFiles();
 
             return res.status(400).json({
 
@@ -88,7 +99,9 @@ const addBook = async (req, res) => {
         // Book Cover Image Is Required
         // ===========================
 
-        if (!req.file) {
+        if (!imageFile) {
+
+            cleanupUploadedFiles();
 
             return res.status(400).json({
 
@@ -97,6 +110,41 @@ const addBook = async (req, res) => {
                 message: "Book image is required."
 
             });
+
+        }
+
+        // ===========================
+        // Book Listing Limit
+        // req.user.bookLimit is a specific override an admin set for this
+        // account; if it's null, fall back to DEFAULT_BOOK_LIMIT from .env
+        // (see authController.updateUserBookLimit).
+        // ===========================
+
+        const effectiveLimit =
+            req.user.bookLimit !== null && req.user.bookLimit !== undefined
+                ? req.user.bookLimit
+                : Number(process.env.DEFAULT_BOOK_LIMIT) || null;
+
+        if (effectiveLimit !== null) {
+
+            const currentBookCount = await Book.countDocuments({
+                owner: req.user._id,
+                isDeleted: false
+            });
+
+            if (currentBookCount >= effectiveLimit) {
+
+                cleanupUploadedFiles();
+
+                return res.status(403).json({
+
+                    success: false,
+
+                    message: `You've reached your book listing limit (${effectiveLimit}). Contact an admin to increase it.`
+
+                });
+
+            }
 
         }
 
@@ -130,7 +178,11 @@ const addBook = async (req, res) => {
 
             status: status || undefined,
 
-            coverImage: `uploads/${req.file.filename}`,
+            readLink: readLink || "",
+
+            coverImage: `uploads/${imageFile.filename}`,
+
+            pdfFile: pdfFile ? `uploads/${pdfFile.filename}` : "",
 
             owner: req.user._id
 
@@ -612,15 +664,24 @@ const updateBook = async (req, res) => {
             book.tags = parseTags(req.body.tags);
         }
 
+        // readLink is allowed to be cleared to an empty string (unlike
+        // the fields above, which skip blank values on purpose).
+        if (req.body.readLink !== undefined) {
+            book.readLink = req.body.readLink;
+        }
+
+        const imageFile = req.files?.image?.[0];
+        const pdfFile = req.files?.pdfFile?.[0];
+
         // ===========================
         // Cover Image — Replace / Remove / Keep
         // ===========================
 
-        if (req.file) {
+        if (imageFile) {
 
             // A new image was uploaded — swap it in and delete the old one.
             deleteImageFile(book.coverImage);
-            book.coverImage = `uploads/${req.file.filename}`;
+            book.coverImage = `uploads/${imageFile.filename}`;
 
         } else if (req.body.removeImage === "true") {
 
@@ -629,6 +690,22 @@ const updateBook = async (req, res) => {
 
         }
         // Otherwise: no file + no removeImage flag → keep the existing image.
+
+        // ===========================
+        // PDF — Replace / Remove / Keep
+        // ===========================
+
+        if (pdfFile) {
+
+            deleteImageFile(book.pdfFile);
+            book.pdfFile = `uploads/${pdfFile.filename}`;
+
+        } else if (req.body.removePdf === "true") {
+
+            deleteImageFile(book.pdfFile);
+            book.pdfFile = "";
+
+        }
 
         const updatedBook = await book.save();
 
@@ -856,8 +933,9 @@ const permanentDeleteBook = async (req, res) => {
             });
         }
 
-        // The DB record is gone — don't leave the image file orphaned on disk.
+        // The DB record is gone — don't leave the image/PDF files orphaned on disk.
         deleteImageFile(book.coverImage);
+        deleteImageFile(book.pdfFile);
 
         res.status(200).json({
             message: "Book permanently deleted",

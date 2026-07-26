@@ -126,6 +126,44 @@ const userSchema = new mongoose.Schema({
     isDeleted: {
         type: Boolean,
         default: false
+    },
+
+    // ===========================
+    // Blocked By Admin
+    // Distinct from isDeleted: this actively prevents login and revokes
+    // access on every request, not just a soft-delete flag.
+    // ===========================
+
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
+
+    // ===========================
+    // Book Listing Limit (set by Admin)
+    // null = no limit
+    // ===========================
+
+    bookLimit: {
+        type: Number,
+        default: null
+    },
+
+    // ===========================
+    // Password Reset
+    // Only the SHA-256 hash of the reset token is stored — the raw
+    // token is what's emailed to the user and never touches the DB,
+    // so a database leak alone can't be used to reset anyone's password.
+    // ===========================
+
+    resetPasswordToken: {
+        type: String,
+        default: undefined
+    },
+
+    resetPasswordExpire: {
+        type: Date,
+        default: undefined
     }
 
 },

@@ -45,7 +45,7 @@ const errorMiddleware = (err, req, res, next) => {
         if (err.code === "LIMIT_FILE_SIZE") {
             return res.status(400).json({
                 success: false,
-                message: "Image must be smaller than 5 MB."
+                message: "File is too large. Images should be under 5 MB and PDFs under 15 MB."
             });
         }
 

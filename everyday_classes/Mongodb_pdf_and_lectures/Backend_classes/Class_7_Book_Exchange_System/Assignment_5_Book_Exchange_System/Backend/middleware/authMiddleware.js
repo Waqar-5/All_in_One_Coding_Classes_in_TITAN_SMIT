@@ -76,6 +76,25 @@ const protect = async (req, res, next) => {
         }
 
         // ===========================
+        // Blocked Users Lose Access Immediately
+        // A JWT is stateless — without this check, a user blocked
+        // mid-session would keep working on their existing token until
+        // it naturally expired. This check runs on every protected
+        // request, so blocking takes effect right away.
+        // ===========================
+
+        if (user.isBlocked) {
+
+            return res.status(401).json({
+
+                success: false,
+                message: "Your account has been blocked by an admin."
+
+            });
+
+        }
+
+        // ===========================
         // Save User In Request
         // ===========================
 

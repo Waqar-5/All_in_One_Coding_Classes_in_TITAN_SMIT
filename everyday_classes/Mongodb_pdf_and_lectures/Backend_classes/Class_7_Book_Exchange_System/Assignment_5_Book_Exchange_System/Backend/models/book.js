@@ -73,6 +73,28 @@ const bookSchema = new mongoose.Schema({
     },
 
     // ===========================
+    // Read Online Link
+    // An external URL where the book can be read (e.g. a Google Books
+    // preview, an online library, the author's own site, etc.)
+    // ===========================
+
+    readLink: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+
+    // ===========================
+    // Uploaded PDF
+    // Stored the same way as coverImage — a relative "uploads/..." path
+    // ===========================
+
+    pdfFile: {
+        type: String,
+        default: ""
+    },
+
+    // ===========================
     // Book Condition
     // ===========================
 

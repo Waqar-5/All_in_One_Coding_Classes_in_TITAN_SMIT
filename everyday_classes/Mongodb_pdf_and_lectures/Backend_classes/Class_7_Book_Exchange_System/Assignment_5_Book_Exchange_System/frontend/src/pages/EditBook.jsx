@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { FiArrowLeft, FiCheck } from "react-icons/fi";
 import FormInput from "../components/FormInput";
 import ImageUpload from "../components/ImageUpload";
+import PdfUpload from "../components/PdfUpload";
 import Button from "../components/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorMessage from "../components/ErrorMessage";
@@ -27,6 +28,9 @@ export default function EditBook() {
   const [existingImageUrl, setExistingImageUrl] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imageRemoved, setImageRemoved] = useState(false);
+  const [existingPdfUrl, setExistingPdfUrl] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfRemoved, setPdfRemoved] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,8 +55,10 @@ export default function EditBook() {
         status: data.status || "Available",
         location: data.location || "",
         tags: tagsToString(data.tags),
+        readLink: data.readLink || "",
       });
       setExistingImageUrl(getImageUrl(data.coverImage));
+      setExistingPdfUrl(getImageUrl(data.pdfFile));
     } catch (err) {
       setError(err.message || "This book couldn't be found.");
     } finally {
@@ -81,6 +87,17 @@ export default function EditBook() {
     setImageRemoved(true);
   };
 
+  const handlePdfSelect = (file) => {
+    setPdfFile(file);
+    setPdfRemoved(false);
+    if (errors.pdf) setErrors((er) => ({ ...er, pdf: undefined }));
+  };
+
+  const handleRemoveExistingPdf = () => {
+    setExistingPdfUrl(null);
+    setPdfRemoved(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,7 +115,11 @@ export default function EditBook() {
     setSubmitting(true);
     setProgress(0);
     try {
-      const formData = buildBookFormData(form, imageFile, { removeImage: imageRemoved });
+      const formData = buildBookFormData(form, imageFile, {
+        removeImage: imageRemoved,
+        pdfFile,
+        removePdf: pdfRemoved,
+      });
       await updateBook(id, formData, setProgress);
       toast.success("Book updated.");
       navigate(`/books/${id}`);
@@ -141,6 +162,14 @@ export default function EditBook() {
                 onRemoveExisting={handleRemoveExisting}
                 error={errors.image}
                 progress={progress}
+              />
+
+              <PdfUpload
+                file={pdfFile}
+                existingFileUrl={existingPdfUrl}
+                onFileSelect={handlePdfSelect}
+                onRemoveExisting={handleRemoveExistingPdf}
+                error={errors.pdf}
               />
 
               <FormInput
@@ -243,6 +272,16 @@ export default function EditBook() {
                 placeholder="comma, separated, keywords"
                 value={form.tags}
                 onChange={handleChange("tags")}
+              />
+
+              <FormInput
+                id="readLink"
+                label="Read online link"
+                type="url"
+                placeholder="https://example.com/read-this-book (optional)"
+                value={form.readLink}
+                onChange={handleChange("readLink")}
+                hint="A link where readers can preview or read the book online."
               />
 
               <div className="flex justify-end gap-3 pt-2">

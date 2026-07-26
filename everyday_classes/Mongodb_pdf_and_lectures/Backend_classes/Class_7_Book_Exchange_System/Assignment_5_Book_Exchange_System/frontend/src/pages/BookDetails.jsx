@@ -13,6 +13,8 @@ import {
   FiEye,
   FiRepeat,
   FiHeart,
+  FiExternalLink,
+  FiDownload,
 } from "react-icons/fi";
 import { getBookById, deleteBook } from "../api/books";
 import { requestExchange } from "../api/exchange";
@@ -201,7 +203,21 @@ export default function BookDetails() {
                 </div>
               )}
 
-              <div className="flex flex-col gap-3 border-t border-dashed border-ink-100 dark:border-paper-400/10 p-8 sm:flex-row sm:justify-end sm:p-10">
+              <div className="flex flex-col gap-3 border-t border-dashed border-ink-100 dark:border-paper-400/10 p-8 sm:flex-row sm:flex-wrap sm:justify-end sm:p-10">
+                {book.readLink && (
+                  <a href={book.readLink} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" icon={FiExternalLink}>
+                      Read online
+                    </Button>
+                  </a>
+                )}
+                {book.pdfFile && (
+                  <a href={getImageUrl(book.pdfFile)} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" icon={FiDownload}>
+                      Download PDF
+                    </Button>
+                  </a>
+                )}
                 {isOwner ? (
                   <>
                     <Button variant="outline" icon={FiEdit3} onClick={() => navigate(`/edit/${book._id}`)}>

@@ -162,6 +162,16 @@ export default function AuthModal() {
                   onChange={handleLoginChange("password")}
                   error={errors.password}
                 />
+                <button
+                  type="button"
+                  onClick={() => {
+                    close();
+                    navigate("/forgot-password");
+                  }}
+                  className="-mt-2 text-left text-xs font-semibold text-moss-600 dark:text-brass-400 hover:underline"
+                >
+                  Forgot password?
+                </button>
               </>
             ) : (
               <>

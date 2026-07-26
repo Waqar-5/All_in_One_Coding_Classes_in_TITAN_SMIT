@@ -76,7 +76,12 @@ router.get("/admin/all", protect, adminOnly, getAllBooksAdmin);
 // Add Book (multipart/form-data — cover image required)
 // POST /api/books
 
-router.post("/", protect, upload.single("image"), addBook);
+const BOOK_UPLOAD_FIELDS = upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "pdfFile", maxCount: 1 }
+]);
+
+router.post("/", protect, BOOK_UPLOAD_FIELDS, addBook);
 
 // ======================================================
 // Public Route (must come after /my-books and /stats)
@@ -90,7 +95,7 @@ router.get("/:id", getBookById);
 // Update Book (multipart/form-data — cover image optional)
 // PUT /api/books/:id
 
-router.put("/:id", protect, upload.single("image"), updateBook);
+router.put("/:id", protect, BOOK_UPLOAD_FIELDS, updateBook);
 
 // Delete Book (Soft Delete)
 // DELETE /api/books/:id

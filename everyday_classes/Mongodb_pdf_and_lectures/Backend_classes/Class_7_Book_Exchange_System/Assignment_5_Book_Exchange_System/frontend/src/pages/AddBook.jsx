@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { FiArrowLeft, FiCheck } from "react-icons/fi";
 import FormInput from "../components/FormInput";
 import ImageUpload from "../components/ImageUpload";
+import PdfUpload from "../components/PdfUpload";
 import Button from "../components/Button";
 import PageTransition from "../components/PageTransition";
 import { createBook } from "../api/books";
@@ -24,12 +25,14 @@ const initialForm = {
   isbn: "",
   location: "",
   tags: "",
+  readLink: "",
 };
 
 export default function AddBook() {
   const { user } = useAuth();
   const [form, setForm] = useState(initialForm);
   const [imageFile, setImageFile] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -43,6 +46,11 @@ export default function AddBook() {
   const handleImageSelect = (file) => {
     setImageFile(file);
     if (errors.image) setErrors((er) => ({ ...er, image: undefined }));
+  };
+
+  const handlePdfSelect = (file) => {
+    setPdfFile(file);
+    if (errors.pdf) setErrors((er) => ({ ...er, pdf: undefined }));
   };
 
   const handleSubmit = async (e) => {
@@ -62,7 +70,7 @@ export default function AddBook() {
     setSubmitting(true);
     setProgress(0);
     try {
-      const formData = buildBookFormData(form, imageFile);
+      const formData = buildBookFormData(form, imageFile, { pdfFile });
       await createBook(formData, setProgress);
       toast.success("Book added to the catalog!");
       navigate("/my-books");
@@ -89,6 +97,11 @@ export default function AddBook() {
         <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-400 dark:text-paper-300">
           Add a title to the community catalog so other readers can find it. It'll be listed under your account.
         </p>
+        {user?.bookLimit !== null && user?.bookLimit !== undefined && (
+          <p className="mt-2 max-w-md text-xs font-medium text-brass-600 dark:text-brass-400">
+            Your account can list up to {user.bookLimit} book{user.bookLimit === 1 ? "" : "s"}.
+          </p>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -100,6 +113,12 @@ export default function AddBook() {
             onFileSelect={handleImageSelect}
             error={errors.image}
             progress={progress}
+          />
+
+          <PdfUpload
+            file={pdfFile}
+            onFileSelect={handlePdfSelect}
+            error={errors.pdf}
           />
 
           <FormInput
@@ -222,6 +241,16 @@ export default function AddBook() {
             hint="Helps other readers find this book when searching."
           />
 
+          <FormInput
+            id="readLink"
+            label="Read online link"
+            type="url"
+            placeholder="https://example.com/read-this-book (optional)"
+            value={form.readLink}
+            onChange={handleChange("readLink")}
+            hint="A link where readers can preview or read the book online."
+          />
+
           <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"
@@ -229,6 +258,7 @@ export default function AddBook() {
               onClick={() => {
                 setForm(initialForm);
                 setImageFile(null);
+                setPdfFile(null);
               }}
               disabled={submitting}
             >

@@ -1,7 +1,7 @@
 // ======================================================
 // Upload Middleware (Multer)
-// Handles book cover image uploads — disk storage under
-// /uploads, with type + size validation.
+// Handles book cover images, profile photos, and book PDFs — disk
+// storage under /uploads, with per-field type + size validation.
 // ======================================================
 
 const multer = require("multer");
@@ -40,27 +40,45 @@ const storage = multer.diskStorage({
 });
 
 // ===========================
-// File Filter — Allowed Types
+// File Filter — Allowed Types Per Field
+// "image" / "profileImage" → images only
+// "pdfFile" → PDF only
 // ===========================
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_PDF_TYPES = ["application/pdf"];
 
 const fileFilter = (req, file, cb) => {
 
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new multer.MulterError(
+    if (file.fieldname === "pdfFile") {
+
+        if (ALLOWED_PDF_TYPES.includes(file.mimetype)) {
+            return cb(null, true);
+        }
+
+        return cb(new multer.MulterError(
             "LIMIT_UNEXPECTED_FILE",
-            "Only JPG, JPEG, PNG, and WEBP images are allowed."
+            "Only PDF files are allowed for the book PDF."
         ));
+
     }
+
+    // "image" and "profileImage" fields
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+        return cb(null, true);
+    }
+
+    cb(new multer.MulterError(
+        "LIMIT_UNEXPECTED_FILE",
+        "Only JPG, JPEG, PNG, and WEBP images are allowed."
+    ));
 
 };
 
 // ===========================
 // Multer Instance
-// Max size: 5 MB
+// Max size: 15 MB (accommodates a modest PDF; images are additionally
+// capped at 5 MB client-side in the ImageUpload component)
 // ===========================
 
 const upload = multer({
@@ -70,7 +88,7 @@ const upload = multer({
     fileFilter,
 
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5 MB
+        fileSize: 15 * 1024 * 1024 // 15 MB
     }
 
 });

@@ -22,11 +22,19 @@ const {
 
     changePassword,
 
+    forgotPassword,
+
+    resetPassword,
+
     getAllUsers,
+
+    getUserDetailsAdmin,
 
     updateUserRole,
 
-    toggleUserDeleted
+    toggleUserBlocked,
+
+    updateUserBookLimit
 
 } = require("../controllers/authController");
 
@@ -47,6 +55,16 @@ router.post("/register", authLimiter, registerUser);
 // POST /api/auth/login
 
 router.post("/login", authLimiter, loginUser);
+
+// Forgot Password — request a reset link
+// POST /api/auth/forgot-password
+
+router.post("/forgot-password", authLimiter, forgotPassword);
+
+// Reset Password — using the token from the emailed link
+// POST /api/auth/reset-password/:token
+
+router.post("/reset-password/:token", authLimiter, resetPassword);
 
 // ======================================================
 // Private Routes
@@ -76,15 +94,25 @@ router.put("/change-password", protect, changePassword);
 
 router.get("/users", protect, adminOnly, getAllUsers);
 
+// Get A Specific User's Profile + Their Books
+// GET /api/auth/users/:id
+
+router.get("/users/:id", protect, adminOnly, getUserDetailsAdmin);
+
 // Update A User's Role
 // PATCH /api/auth/users/:id/role
 
 router.patch("/users/:id/role", protect, adminOnly, updateUserRole);
 
-// Deactivate / Restore A User
-// PATCH /api/auth/users/:id/toggle-delete
+// Block / Unblock A User
+// PATCH /api/auth/users/:id/toggle-block
 
-router.patch("/users/:id/toggle-delete", protect, adminOnly, toggleUserDeleted);
+router.patch("/users/:id/toggle-block", protect, adminOnly, toggleUserBlocked);
+
+// Set A User's Book Listing Limit
+// PATCH /api/auth/users/:id/book-limit
+
+router.patch("/users/:id/book-limit", protect, adminOnly, updateUserBookLimit);
 
 // ======================================================
 // Export Router

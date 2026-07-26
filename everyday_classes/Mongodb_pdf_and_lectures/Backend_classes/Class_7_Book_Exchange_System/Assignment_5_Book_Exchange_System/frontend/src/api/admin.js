@@ -38,12 +38,22 @@ export const getAllUsers = async (params = {}) => {
   return data; // { success, totalUsers, currentPage, totalPages, users }
 };
 
+export const getUserDetailsAdmin = async (id) => {
+  const { data } = await api.get(`/auth/users/${id}`);
+  return data; // { success, user, books, stats }
+};
+
 export const updateUserRole = async (id, role) => {
   const { data } = await api.patch(`/auth/users/${id}/role`, { role });
   return data;
 };
 
-export const toggleUserDeleted = async (id) => {
-  const { data } = await api.patch(`/auth/users/${id}/toggle-delete`);
+export const toggleUserBlocked = async (id) => {
+  const { data } = await api.patch(`/auth/users/${id}/toggle-block`);
+  return data;
+};
+
+export const updateUserBookLimit = async (id, bookLimit) => {
+  const { data } = await api.patch(`/auth/users/${id}/book-limit`, { bookLimit });
   return data;
 };

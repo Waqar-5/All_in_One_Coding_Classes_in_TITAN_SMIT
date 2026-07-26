@@ -8,6 +8,7 @@ import {
   FiUserX,
   FiUserCheck,
   FiSearch,
+  FiBookOpen,
 } from "react-icons/fi";
 import {
   getAllBooksAdmin,
@@ -15,7 +16,8 @@ import {
   permanentlyDeleteBook,
   getAllUsers,
   updateUserRole,
-  toggleUserDeleted,
+  toggleUserBlocked,
+  updateUserBookLimit,
 } from "../api/admin";
 import StatusBadge from "../components/StatusBadge";
 import Button from "../components/Button";
@@ -261,14 +263,35 @@ function UsersTab({ currentUser }) {
     }
   };
 
-  const handleDeleteToggle = async (targetUser) => {
+  const handleBlockToggle = async (targetUser) => {
     setActingId(targetUser._id);
     try {
-      const result = await toggleUserDeleted(targetUser._id);
+      const result = await toggleUserBlocked(targetUser._id);
       toast.success(result.message);
       fetchUsers(page);
     } catch (err) {
       toast.error(err.message || "Couldn't update this user.");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const handleLimitSave = async (targetUser, limitInput) => {
+    const trimmed = limitInput.trim();
+    const bookLimit = trimmed === "" ? null : Number(trimmed);
+
+    if (bookLimit !== null && (Number.isNaN(bookLimit) || bookLimit < 0)) {
+      toast.error("Enter a non-negative number, or leave it blank for no limit.");
+      return;
+    }
+
+    setActingId(targetUser._id);
+    try {
+      const result = await updateUserBookLimit(targetUser._id, bookLimit);
+      toast.success(result.message);
+      fetchUsers(page);
+    } catch (err) {
+      toast.error(err.message || "Couldn't update the book limit.");
     } finally {
       setActingId(null);
     }
@@ -300,64 +323,108 @@ function UsersTab({ currentUser }) {
       ) : (
         <>
           <div className="divide-y divide-dashed divide-ink-100 dark:divide-paper-400/10 rounded-2xl border border-ink-100 dark:border-paper-400/10 bg-paper-50 dark:bg-ink-700/40">
-            {users.map((u) => {
-              const isSelf = u._id === currentUser?._id;
-              return (
-                <div key={u._id} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-display text-lg font-medium text-ink-700 dark:text-paper-50">
-                        {u.name} {isSelf && <span className="text-xs font-normal text-ink-300 dark:text-paper-400/60">(you)</span>}
-                      </p>
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                          u.role === "Admin"
-                            ? "bg-brass-50 dark:bg-brass-500/10 text-brass-600 dark:text-brass-400"
-                            : "bg-paper-100 dark:bg-paper-400/10 text-ink-400 dark:text-paper-300"
-                        }`}
-                      >
-                        {u.role}
-                      </span>
-                      {u.isDeleted && (
-                        <span className="rounded-full bg-clay-50 dark:bg-clay-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-clay-500">
-                          Deactivated
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-sm text-ink-400 dark:text-paper-300">
-                      {u.email} · Member since {formatDate(u.createdAt)}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      icon={FiShield}
-                      loading={actingId === u._id}
-                      disabled={isSelf}
-                      onClick={() => handleRoleToggle(u)}
-                    >
-                      {u.role === "Admin" ? "Demote" : "Promote"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={u.isDeleted ? "outline" : "danger"}
-                      icon={u.isDeleted ? FiUserCheck : FiUserX}
-                      loading={actingId === u._id}
-                      disabled={isSelf}
-                      onClick={() => handleDeleteToggle(u)}
-                    >
-                      {u.isDeleted ? "Restore" : "Deactivate"}
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+            {users.map((u) => (
+              <UserRow
+                key={u._id}
+                u={u}
+                isSelf={u._id === currentUser?._id}
+                actingId={actingId}
+                onRoleToggle={handleRoleToggle}
+                onBlockToggle={handleBlockToggle}
+                onLimitSave={handleLimitSave}
+              />
+            ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={(p) => fetchUsers(p)} />
         </>
       )}
+    </div>
+  );
+}
+
+// ======================================================
+// Single User Row
+// Its own component so the book-limit input field has its own local
+// state per row, without the parent needing to track an object of
+// in-progress edits for every user in the list.
+// ======================================================
+
+function UserRow({ u, isSelf, actingId, onRoleToggle, onBlockToggle, onLimitSave }) {
+  const [limitInput, setLimitInput] = useState(u.bookLimit === null || u.bookLimit === undefined ? "" : String(u.bookLimit));
+  const acting = actingId === u._id;
+
+  return (
+    <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to={`/admin/users/${u._id}`}
+            className="font-display text-lg font-medium text-ink-700 hover:text-moss-600 dark:text-paper-50 dark:hover:text-brass-400"
+          >
+            {u.name} {isSelf && <span className="text-xs font-normal text-ink-300 dark:text-paper-400/60">(you)</span>}
+          </Link>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+              u.role === "Admin"
+                ? "bg-brass-50 dark:bg-brass-500/10 text-brass-600 dark:text-brass-400"
+                : "bg-paper-100 dark:bg-paper-400/10 text-ink-400 dark:text-paper-300"
+            }`}
+          >
+            {u.role}
+          </span>
+          {u.isBlocked && (
+            <span className="rounded-full bg-clay-50 dark:bg-clay-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-clay-500">
+              Blocked
+            </span>
+          )}
+        </div>
+        <p className="mt-0.5 text-sm text-ink-400 dark:text-paper-300">
+          {u.email} · Member since {formatDate(u.createdAt)}
+        </p>
+
+        <div className="mt-2 flex items-center gap-1.5">
+          <FiBookOpen className="text-ink-300 dark:text-paper-400/60" aria-hidden="true" />
+          <label htmlFor={`limit-${u._id}`} className="text-xs text-ink-400 dark:text-paper-300">
+            Book limit
+          </label>
+          <input
+            id={`limit-${u._id}`}
+            type="number"
+            min="0"
+            value={limitInput}
+            onChange={(e) => setLimitInput(e.target.value)}
+            placeholder="Unlimited"
+            className="w-20 rounded-full border border-ink-200 dark:border-paper-400/20 bg-paper-50 dark:bg-ink-700/60
+              px-2.5 py-1 text-xs text-ink-700 dark:text-paper-100 outline-none focus:border-moss-500"
+          />
+          <Button size="sm" variant="ghost" loading={acting} onClick={() => onLimitSave(u, limitInput)}>
+            Set
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          icon={FiShield}
+          loading={acting}
+          disabled={isSelf}
+          onClick={() => onRoleToggle(u)}
+        >
+          {u.role === "Admin" ? "Demote" : "Promote"}
+        </Button>
+        <Button
+          size="sm"
+          variant={u.isBlocked ? "outline" : "danger"}
+          icon={u.isBlocked ? FiUserCheck : FiUserX}
+          loading={acting}
+          disabled={isSelf}
+          onClick={() => onBlockToggle(u)}
+        >
+          {u.isBlocked ? "Unblock" : "Block"}
+        </Button>
+      </div>
     </div>
   );
 }

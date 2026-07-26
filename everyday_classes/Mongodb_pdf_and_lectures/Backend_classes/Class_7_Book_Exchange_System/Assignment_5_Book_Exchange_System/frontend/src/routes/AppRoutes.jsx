@@ -10,8 +10,11 @@ import MyBooks from "../pages/MyBooks";
 import Profile from "../pages/Profile";
 import Wishlist from "../pages/Wishlist";
 import Admin from "../pages/Admin";
+import AdminUserDetail from "../pages/AdminUserDetail";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import NotFound from "../pages/NotFound";
 import ProtectedRoute from "../components/ProtectedRoute";
 import AdminRoute from "../components/AdminRoute";
@@ -28,6 +31,8 @@ export default function AppRoutes() {
         <Route path="/books/:id" element={<BookDetails />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route
           path="/add"
@@ -74,6 +79,14 @@ export default function AppRoutes() {
           element={
             <AdminRoute>
               <Admin />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:id"
+          element={
+            <AdminRoute>
+              <AdminUserDetail />
             </AdminRoute>
           }
         />
