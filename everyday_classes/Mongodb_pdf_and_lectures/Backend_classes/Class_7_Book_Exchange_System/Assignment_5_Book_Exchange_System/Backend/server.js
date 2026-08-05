@@ -47,8 +47,21 @@ const errorMiddleware = require("./middleware/errorMiddleware");
 const app = express();
 
 // ======================
+// Trust Proxy
+// ======================
+// Required on Vercel (and most PaaS hosts): the app sits behind a proxy,
+// so req.ip / X-Forwarded-For need this to be set correctly. Without it,
+// express-rate-limit sees every request as coming from the same IP and
+// either rate-limits everyone together or throws a validation error.
+app.set("trust proxy", 1);
+
+// ======================
 // Connect Database
 // ======================
+// On a serverless platform, module-level code runs on cold start and the
+// connection is reused across warm invocations (mongoose caches it
+// internally), so this still works correctly without calling connectDB()
+// again per-request.
 
 connectDB().then(() => {
     // Mongoose queues model operations until the connection is ready
@@ -80,7 +93,17 @@ app.use(helmet({
 app.use(compression());
 
 // Allows frontend to access backend
-app.use(cors());
+// FRONTEND_URL restricts this to your deployed frontend in production.
+// If it's not set, CORS falls back to allowing any origin (fine for local
+// dev, not recommended once this is live on the public internet).
+const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+    : true;
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
 
 // Shows requests in terminal
 app.use(morgan("dev"));
@@ -170,14 +193,22 @@ app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Only listen on a port for local dev / traditional hosts (Render, Railway,
+// a VPS, etc). On Vercel, this file is imported by api/index.js and the
+// platform calls the exported `app` directly as a request handler per
+// invocation — it never runs `node server.js`, so this block is skipped.
+if (require.main === module) {
+    app.listen(PORT, () => {
 
-    console.log("====================================");
-    console.log(`🚀 Server Running`);
-    console.log(`🌐 http://localhost:${PORT}`);
-    console.log("====================================");
+        console.log("====================================");
+        console.log(`🚀 Server Running`);
+        console.log(`🌐 http://localhost:${PORT}`);
+        console.log("====================================");
 
-});
+    });
+}
+
+module.exports = app;
 
 
 // // ======================
